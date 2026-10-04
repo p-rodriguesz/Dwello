@@ -1,5 +1,1 @@
-import { FastifyPluginAsync } from 'fastify';
-
-const ocorrenciasRoutes: FastifyPluginAsync = async () => {};
-
-export default ocorrenciasRoutes;
+export { default } from './recursos.routes';

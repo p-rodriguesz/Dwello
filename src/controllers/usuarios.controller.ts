@@ -1,182 +1,83 @@
+import { createHash } from 'node:crypto';
+import { eq, like, or } from 'drizzle-orm';
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { Usuario } from '../models/usuario';
+import { db } from '../db';
+import { usuarios } from '../db/schema';
+import { databaseError, databaseUnavailable, invalidData, invalidId, isNonEmptyString, parseId } from './helpers';
 
-type UsuarioPayload = Omit<Usuario, 'id'>;
+type UsuarioBody = { nome?: unknown; email?: unknown; senha?: unknown; perfil?: unknown; ativo?: unknown };
+type IdRequest = FastifyRequest<{ Params: { id: string } }>;
+type UsuarioRequest = FastifyRequest<{ Body: UsuarioBody }>;
+type UsuarioUpdateRequest = FastifyRequest<{ Params: { id: string }; Body: UsuarioBody }>;
+type BuscaRequest = FastifyRequest<{ Querystring: { q?: string } }>;
 
-type UsuarioIdRequest = FastifyRequest<{
-  Params: {
-    id: string;
-  };
-}>;
+const perfis = new Set(['morador', 'sindico', 'porteiro', 'prestador', 'admin']);
+const perfilValues = ['morador', 'sindico', 'porteiro', 'prestador', 'admin'] as const;
 
-type CriarUsuarioRequest = FastifyRequest<{
-  Body: UsuarioPayload;
-}>;
-
-type AtualizarUsuarioRequest = FastifyRequest<{
-  Params: {
-    id: string;
-  };
-  Body: Partial<UsuarioPayload>;
-}>;
-
-const usuarios: Usuario[] = [];
-let proximoId = 1;
-
-function isValidText(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
+function isEmail(value: unknown): value is string {
+  return isNonEmptyString(value) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function isValidEmail(value: unknown): value is string {
-  return isValidText(value) && value.includes('@');
+function hashSenha(senha: string) { return createHash('sha256').update(senha).digest('hex'); }
+function publicUsuario(usuario: typeof usuarios.$inferSelect) {
+  const { senhaHash: _senhaHash, ...dados } = usuario;
+  return dados;
 }
 
-function isValidUsuarioPayload(payload: unknown): payload is UsuarioPayload {
-  if (!payload || typeof payload !== 'object') {
-    return false;
-  }
-
-  const usuario = payload as Record<string, unknown>;
-
-  return (
-    isValidText(usuario.nome) &&
-    isValidEmail(usuario.email) &&
-    isValidText(usuario.senha) &&
-    isValidText(usuario.apartamento) &&
-    isValidText(usuario.bloco)
-  );
+export async function listarUsuarios(request: BuscaRequest, reply: FastifyReply) {
+  if (!db) return databaseUnavailable(reply);
+  const q = request.query.q?.trim();
+  const dados = await db.select().from(usuarios)
+    .where(q ? or(like(usuarios.nome, `%${q}%`), like(usuarios.email, `%${q}%`)) : undefined);
+  return reply.send(dados.map(publicUsuario));
 }
 
-function parseId(id: string): number | null {
-  const parsedId = Number(id);
-
-  return Number.isInteger(parsedId) && parsedId > 0 ? parsedId : null;
-}
-
-export async function listarUsuarios(
-  _request: FastifyRequest,
-  reply: FastifyReply
-) {
-  return reply.status(200).send(usuarios);
-}
-
-export async function buscarUsuarioPorId(
-  request: UsuarioIdRequest,
-  reply: FastifyReply
-) {
+export async function buscarUsuarioPorId(request: IdRequest, reply: FastifyReply) {
+  if (!db) return databaseUnavailable(reply);
   const id = parseId(request.params.id);
-
-  if (id === null) {
-    return reply.status(400).send({ error: 'ID inválido.' });
-  }
-
-  const usuario = usuarios.find((item) => item.id === id);
-
-  if (!usuario) {
-    return reply.status(404).send({ error: 'Usuário não encontrado.' });
-  }
-
-  return reply.status(200).send(usuario);
+  if (!id) return invalidId(reply);
+  const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id)).limit(1);
+  return usuario ? reply.send(publicUsuario(usuario)) : reply.status(404).send({ error: 'Usuário não encontrado.' });
 }
 
-export async function criarUsuario(
-  request: CriarUsuarioRequest,
-  reply: FastifyReply
-) {
-  if (!isValidUsuarioPayload(request.body)) {
-    return reply.status(400).send({ error: 'Dados do usuário inválidos.' });
-  }
-
-  const emailJaExiste = usuarios.some(
-    (usuario) => usuario.email === request.body.email
-  );
-
-  if (emailJaExiste) {
-    return reply.status(409).send({ error: 'E-mail já cadastrado.' });
-  }
-
-  const usuario: Usuario = {
-    id: proximoId,
-    ...request.body
-  };
-
-  usuarios.push(usuario);
-  proximoId += 1;
-
-  return reply.status(201).send(usuario);
+export async function criarUsuario(request: UsuarioRequest, reply: FastifyReply) {
+  if (!db) return databaseUnavailable(reply);
+  const { nome, email, senha, perfil = 'morador', ativo = true } = request.body ?? {};
+  if (!isNonEmptyString(nome) || !isEmail(email) || !isNonEmptyString(senha) || typeof perfil !== 'string' || !perfis.has(perfil) || typeof ativo !== 'boolean') return invalidData(reply);
+  try {
+    const result = await db.insert(usuarios).values({ nome: nome.trim(), email: email.trim().toLowerCase(), senhaHash: hashSenha(senha), perfil: perfil as typeof perfilValues[number], ativo });
+    const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, Number(result[0].insertId))).limit(1);
+    return reply.status(201).send(publicUsuario(usuario));
+  } catch (error) { return databaseError(reply, error); }
 }
 
-export async function atualizarUsuario(
-  request: AtualizarUsuarioRequest,
-  reply: FastifyReply
-) {
+export async function atualizarUsuario(request: UsuarioUpdateRequest, reply: FastifyReply) {
+  if (!db) return databaseUnavailable(reply);
   const id = parseId(request.params.id);
-
-  if (id === null) {
-    return reply.status(400).send({ error: 'ID inválido.' });
-  }
-
-  const usuario = usuarios.find((item) => item.id === id);
-
-  if (!usuario) {
-    return reply.status(404).send({ error: 'Usuário não encontrado.' });
-  }
-
-  const dados = request.body;
-
-  if (!dados || typeof dados !== 'object') {
-    return reply.status(400).send({ error: 'Dados do usuário inválidos.' });
-  }
-
-  const campos = Object.keys(dados) as Array<keyof UsuarioPayload>;
-  const camposValidos = [
-    'nome',
-    'email',
-    'senha',
-    'apartamento',
-    'bloco'
-  ];
-
-  if (
-    campos.some((campo) => !camposValidos.includes(campo)) ||
-    campos.some((campo) =>
-      campo === 'email'
-        ? !isValidEmail(dados[campo])
-        : !isValidText(dados[campo])
-    )
-  ) {
-    return reply.status(400).send({ error: 'Dados do usuário inválidos.' });
-  }
-
-  if (
-    dados.email &&
-    usuarios.some((item) => item.email === dados.email && item.id !== id)
-  ) {
-    return reply.status(409).send({ error: 'E-mail já cadastrado.' });
-  }
-
-  Object.assign(usuario, dados);
-
-  return reply.status(200).send(usuario);
+  if (!id) return invalidId(reply);
+  const body = request.body ?? {};
+  const campos = Object.keys(body);
+  if (!campos.length || campos.some((campo) => !['nome', 'email', 'senha', 'perfil', 'ativo'].includes(campo)) || (body.nome !== undefined && !isNonEmptyString(body.nome)) || (body.email !== undefined && !isEmail(body.email)) || (body.senha !== undefined && !isNonEmptyString(body.senha)) || (body.perfil !== undefined && (typeof body.perfil !== 'string' || !perfis.has(body.perfil))) || (body.ativo !== undefined && typeof body.ativo !== 'boolean')) return invalidData(reply);
+  const values: Partial<typeof usuarios.$inferInsert> = {};
+  if (body.nome !== undefined) values.nome = body.nome.trim();
+  if (body.email !== undefined) values.email = body.email.trim().toLowerCase();
+  if (body.senha !== undefined) values.senhaHash = hashSenha(body.senha);
+  if (body.perfil !== undefined) values.perfil = body.perfil as typeof perfilValues[number];
+  if (body.ativo !== undefined) values.ativo = body.ativo;
+  try {
+    const result = await db.update(usuarios).set(values).where(eq(usuarios.id, id));
+    if (!result[0].affectedRows) return reply.status(404).send({ error: 'Usuário não encontrado.' });
+    const [usuario] = await db.select().from(usuarios).where(eq(usuarios.id, id)).limit(1);
+    return reply.send(publicUsuario(usuario));
+  } catch (error) { return databaseError(reply, error); }
 }
 
-export async function excluirUsuario(
-  request: UsuarioIdRequest,
-  reply: FastifyReply
-) {
+export async function excluirUsuario(request: IdRequest, reply: FastifyReply) {
+  if (!db) return databaseUnavailable(reply);
   const id = parseId(request.params.id);
-
-  if (id === null) {
-    return reply.status(400).send({ error: 'ID inválido.' });
-  }
-
-  const indice = usuarios.findIndex((item) => item.id === id);
-
-  if (indice === -1) {
-    return reply.status(404).send({ error: 'Usuário não encontrado.' });
-  }
-
-  usuarios.splice(indice, 1);
-
-  return reply.status(204).send();
+  if (!id) return invalidId(reply);
+  try {
+    const result = await db.delete(usuarios).where(eq(usuarios.id, id));
+    return result[0].affectedRows ? reply.status(204).send() : reply.status(404).send({ error: 'Usuário não encontrado.' });
+  } catch (error) { return databaseError(reply, error); }
 }

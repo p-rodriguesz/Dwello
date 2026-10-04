@@ -1,131 +1,41 @@
 # API Condomínio
 
-API acadêmica para gerenciamento inicial de usuários de um condomínio. Os dados
-atuais são armazenados somente em memória e são perdidos quando a aplicação é
-reiniciada.
+API REST em Fastify, TypeScript, MySQL e Drizzle para o banco `dwello`.
 
-## Tecnologias
-
-- TypeScript
-- Fastify
-- Node.js
-
-## Estrutura
-
-```text
-src/
-├── controllers/
-│   └── usuarios.controller.ts
-├── routes/
-│   ├── usuarios.routes.ts
-│   └── ocorrencias.routes.ts
-├── models/
-│   ├── usuario.ts
-│   └── ocorrencia.ts
-├── app.ts
-└── server.ts
-tests/
-├── .gitkeep
-.env.example
-package.json
-tsconfig.json
-README.md
-```
-
-## Requisitos
-
-- Node.js 20+
-- npm
-
-## Instalação
+## Configuração
 
 ```bash
 npm install
-```
-
-## Desenvolvimento
-
-Para executar com recarregamento automático:
-
-```bash
+cp .env.example .env
 npm run dev
 ```
 
-A API será iniciada na porta definida por `PORT`, ou na porta `3000` quando a
-variável não estiver definida.
+Defina `DATABASE_URL` com a conexão MySQL, por exemplo `mysql://usuario:senha@localhost:3306/dwello`.
 
-## Build
+## Recursos e rotas
 
-Para gerar os arquivos JavaScript compilados:
+Todos os recursos possuem CRUDL: `GET /recurso`, `GET /recurso/:id`, `POST /recurso`, `PUT /recurso/:id` e `DELETE /recurso/:id`.
 
-```bash
-npm run build
-```
-
-## Produção
-
-Após gerar o build, inicie a aplicação com:
-
-```bash
-npm start
-```
-
-O servidor escuta em `0.0.0.0`.
-
-## Rotas disponíveis
-
-| Método | Rota | Descrição |
+| Recurso | Rota | Campos para criação/atualização |
 | --- | --- | --- |
-| `GET` | `/usuarios` | Lista os usuários |
-| `GET` | `/usuarios/:id` | Busca um usuário pelo ID |
-| `POST` | `/usuarios` | Cria um usuário |
-| `PUT` | `/usuarios/:id` | Atualiza um usuário |
-| `DELETE` | `/usuarios/:id` | Exclui um usuário |
+| Condomínios | `/condominios` | `nome`, `endereco` opcional |
+| Unidades | `/unidades` | `condominio_id`, `bloco`, `numero` |
+| Usuários | `/usuarios` | `nome`, `email`, `senha`, `perfil` opcional, `ativo` opcional |
+| Moradores | `/moradores` | `usuario_id`, `unidade_id`, `tipo_vinculo` opcional |
+| Ocorrências | `/ocorrencias` | `unidade_id` opcional, `usuario_id`, `titulo`, `descricao`, `status` opcional |
 
-As rotas de ocorrências ainda não possuem endpoints implementados.
+`GET /usuarios?q=ana` pesquisa por nome ou e-mail. A rota consulta os usuários persistidos no MySQL, nunca uma lista em memória. A senha é recebida na criação/alteração, armazenada como hash e não é retornada.
 
-## Exemplos de requisições
+Valores aceitos: `perfil` = `morador`, `sindico`, `porteiro`, `prestador`, `admin`; `tipo_vinculo` = `proprietario`, `inquilino`, `dependente`; `status` = `aberta`, `em_andamento`, `resolvida`, `cancelada`.
 
-### Criar usuário
-
-```bash
-curl -X POST http://localhost:3000/usuarios \
-	-H "Content-Type: application/json" \
-	-d '{
-		"nome": "Ana Silva",
-		"email": "ana@example.com",
-		"senha": "senha123",
-		"apartamento": "101",
-		"bloco": "A"
-	}'
-```
-
-### Listar usuários
+## Exemplo
 
 ```bash
-curl http://localhost:3000/usuarios
+curl -X POST http://localhost:3000/condominios -H "Content-Type: application/json" -d '{"nome":"Residencial Aurora"}'
+curl -X POST http://localhost:3000/usuarios -H "Content-Type: application/json" -d '{"nome":"Ana Silva","email":"ana@example.com","senha":"senha-segura"}'
+curl -X POST http://localhost:3000/unidades -H "Content-Type: application/json" -d '{"condominio_id":1,"bloco":"A","numero":"101"}'
+curl -X POST http://localhost:3000/moradores -H "Content-Type: application/json" -d '{"usuario_id":1,"unidade_id":1}'
+curl "http://localhost:3000/usuarios?q=ana"
 ```
 
-### Buscar usuário por ID
-
-```bash
-curl http://localhost:3000/usuarios/1
-```
-
-### Atualizar usuário
-
-```bash
-curl -X PUT http://localhost:3000/usuarios/1 \
-	-H "Content-Type: application/json" \
-	-d '{
-		"apartamento": "202"
-	}'
-```
-
-### Excluir usuário
-
-```bash
-curl -X DELETE http://localhost:3000/usuarios/1
-```
-
-As variáveis de ambiente disponíveis estão em `.env.example`.
+Os IDs relacionados devem existir antes da criação. Exclusões que quebrariam relacionamentos retornam `409`.
