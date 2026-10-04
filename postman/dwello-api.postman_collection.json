@@ -1,0 +1,104 @@
+{
+  "info": {
+    "name": "Dwello API",
+    "description": "Fluxo de CRUDL da API de condomínio. Execute as requisições na ordem apresentada.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "condominioId", "value": "" },
+    { "key": "usuarioId", "value": "" },
+    { "key": "unidadeId", "value": "" },
+    { "key": "moradorId", "value": "" },
+    { "key": "ocorrenciaId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Criar condomínio",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Condomínio Postman {{$timestamp}}\",\n  \"endereco\": \"Rua de Teste, 100\"\n}" },
+        "url": "{{baseUrl}}/condominios"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('condominioId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "2. Criar usuário",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Usuário Postman\",\n  \"email\": \"postman.{{$timestamp}}@example.com\",\n  \"senha\": \"senha123\",\n  \"perfil\": \"morador\"\n}" },
+        "url": "{{baseUrl}}/usuarios"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('usuarioId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "3. Criar unidade",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"condominio_id\": {{condominioId}},\n  \"bloco\": \"P\",\n  \"numero\": \"{{$timestamp}}\"\n}" },
+        "url": "{{baseUrl}}/unidades"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('unidadeId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "4. Criar morador",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"usuario_id\": {{usuarioId}},\n  \"unidade_id\": {{unidadeId}},\n  \"tipo_vinculo\": \"proprietario\"\n}" },
+        "url": "{{baseUrl}}/moradores"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('moradorId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "5. Criar ocorrência",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"unidade_id\": {{unidadeId}},\n  \"usuario_id\": {{usuarioId}},\n  \"titulo\": \"Teste pelo Postman\",\n  \"descricao\": \"Ocorrência criada pela coleção Postman.\",\n  \"status\": \"aberta\"\n}" },
+        "url": "{{baseUrl}}/ocorrencias"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('ocorrenciaId', pm.response.json().id);"] } }]
+    },
+    {
+      "name": "6. Pesquisar usuários",
+      "request": { "method": "GET", "url": "{{baseUrl}}/usuarios?q=postman" }
+    },
+    {
+      "name": "7. Atualizar ocorrência",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"status\": \"em_andamento\" }" },
+        "url": "{{baseUrl}}/ocorrencias/{{ocorrenciaId}}"
+      }
+    },
+    {
+      "name": "8. Listar ocorrências",
+      "request": { "method": "GET", "url": "{{baseUrl}}/ocorrencias" }
+    },
+    {
+      "name": "9. Excluir ocorrência",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/ocorrencias/{{ocorrenciaId}}" }
+    },
+    {
+      "name": "10. Excluir morador",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/moradores/{{moradorId}}" }
+    },
+    {
+      "name": "11. Excluir unidade",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/unidades/{{unidadeId}}" }
+    },
+    {
+      "name": "12. Excluir usuário",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/usuarios/{{usuarioId}}" }
+    },
+    {
+      "name": "13. Excluir condomínio",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/condominios/{{condominioId}}" }
+    }
+  ]
+}

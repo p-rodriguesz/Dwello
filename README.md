@@ -5,12 +5,20 @@ API REST em Fastify, TypeScript, MySQL e Drizzle para o banco `dwello`.
 ## Configuração
 
 ```bash
+copy .env.example .env
 npm install
-cp .env.example .env
 npm run dev
 ```
 
-Defina `DATABASE_URL` com a conexão MySQL, por exemplo `mysql://usuario:senha@localhost:3306/dwello`.
+Após configurar `DATABASE_URL` no `.env`, o `npm install` executa automaticamente o arquivo [database/dwello.sql](database/dwello.sql): ele cria o banco, as cinco tabelas e os dados de demonstração. Para executar novamente, use `npm run setup:db`. O script não duplica os dados de exemplo.
+
+Também é possível abrir e executar o SQL integralmente em qualquer cliente MySQL (MySQL Workbench, DBeaver ou DB Client).
+
+## Postman
+
+Com a API em execução (`npm run dev`), importe o arquivo [postman/dwello-api.postman_collection.json](postman/dwello-api.postman_collection.json) no Postman. A variável `baseUrl` já está configurada como `http://localhost:3000`.
+
+Execute as requisições na ordem numérica. A coleção armazena os IDs gerados automaticamente, pesquisa usuários, atualiza uma ocorrência e remove os registros de teste nas cinco últimas requisições.
 
 ## Recursos e rotas
 

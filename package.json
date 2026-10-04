@@ -5,6 +5,8 @@
   "description": "API acadêmica de condomínio com Fastify e TypeScript",
   "main": "dist/server.js",
   "scripts": {
+    "postinstall": "node scripts/setup-database.js",
+    "setup:db": "node scripts/setup-database.js",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "test": "tsx --test tests/api.test.ts",
