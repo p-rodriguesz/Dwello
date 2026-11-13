@@ -1,0 +1,120 @@
+{
+  "info": {
+    "name": "Dwello API",
+    "description": "Fluxos reais de autenticacao, RBAC, CRUD, relacionamentos e uploads. O cadastro/login valida a sessao, mas o CRUD exige uma conta previamente vinculada em usuario_perfis com permissao para o condominio.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "email", "value": "postman.{{$timestamp}}@example.com" },
+    { "key": "password", "value": "senha-segura-123" },
+    { "key": "usuarioId", "value": "" },
+    { "key": "condominioId", "value": "" },
+    { "key": "otherCondoId", "value": "" },
+    { "key": "unidadeId", "value": "" },
+    { "key": "ocorrenciaId", "value": "" },
+    { "key": "documentoId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('API online', () => pm.response.to.have.status(200));", "pm.test('Banco conectado', () => pm.expect(pm.response.json().database).to.eql('connected')); "] } }]
+    },
+    {
+      "name": "2. Autenticação",
+      "item": [
+        {
+          "name": "Cadastro",
+          "request": { "method": "POST", "header": [{ "key": "Origin", "value": "{{baseUrl}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Usuário Postman\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" }, "url": "{{baseUrl}}/api/auth/sign-up/email" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Cadastro realizado', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Sessão atual",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/auth/get-session" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Sessão persistida', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().user.email).to.eql(pm.variables.get('email')); "] } }]
+        },
+        {
+          "name": "Perfil e vínculos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/me" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Perfil carregado', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('usuarioId', pm.response.json().id); "] } }]
+        },
+        {
+          "name": "Login",
+          "request": { "method": "POST", "header": [{ "key": "Origin", "value": "{{baseUrl}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" }, "url": "{{baseUrl}}/api/auth/sign-in/email" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Login realizado', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "3. Condomínios e unidades",
+      "item": [
+        {
+          "name": "Criar condomínio",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Condomínio Postman {{$timestamp}}\",\n  \"endereco\": \"Rua de Teste, 100\"\n}" }, "url": "{{baseUrl}}/condominios" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Condomínio criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('condominioId', pm.response.json().id); "] } }]
+        },
+        {
+          "name": "Criar segundo condomínio",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"nome\": \"Outro condomínio {{$timestamp}}\" }" }, "url": "{{baseUrl}}/condominios" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Segundo condomínio criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('otherCondoId', pm.response.json().id); "] } }]
+        },
+        {
+          "name": "Listar condomínios",
+          "request": { "method": "GET", "url": "{{baseUrl}}/condominios" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Lista carregada', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Criar unidade",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"condominio_id\": {{condominioId}},\n  \"bloco\": \"A\",\n  \"numero\": \"{{$timestamp}}\"\n}" }, "url": "{{baseUrl}}/unidades" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Unidade criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('unidadeId', pm.response.json().id); "] } }]
+        }
+      ]
+    },
+    {
+      "name": "4. Ocorrências",
+      "item": [
+        {
+          "name": "Criar ocorrência",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"unidade_id\": {{unidadeId}},\n  \"usuario_id\": {{usuarioId}},\n  \"titulo\": \"Ocorrência Postman\",\n  \"descricao\": \"Registro de teste integrado.\",\n  \"status\": \"aberta\"\n}" }, "url": "{{baseUrl}}/ocorrencias" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Ocorrência criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('ocorrenciaId', pm.response.json().id); "] } }]
+        },
+        {
+          "name": "Atualizar ocorrência",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"status\": \"em_andamento\" }" }, "url": "{{baseUrl}}/ocorrencias/{{ocorrenciaId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Ocorrência atualizada', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Listar ocorrências",
+          "request": { "method": "GET", "url": "{{baseUrl}}/ocorrencias" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Ocorrências carregadas', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "5. Uploads",
+      "item": [
+        {
+          "name": "Criar documento",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"condominio_id\": {{condominioId}}, \"titulo\": \"Documento Postman\" }" }, "url": "{{baseUrl}}/documentos" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Documento criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('documentoId', pm.response.json().id); "] } }]
+        },
+        {
+          "name": "Enviar arquivo PDF",
+          "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": "" }] }, "url": "{{baseUrl}}/uploads/documentos/{{documentoId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Upload realizado', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Recuperar arquivo",
+          "request": { "method": "GET", "url": "{{baseUrl}}/uploads/documentos/{{documentoId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Arquivo recuperado', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "6. Encerrar sessão",
+      "request": { "method": "POST", "header": [{ "key": "Origin", "value": "{{baseUrl}}" }], "url": "{{baseUrl}}/api/auth/sign-out" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Logout realizado', () => pm.response.to.have.status(200));"] } }]
+    }
+  ]
+}

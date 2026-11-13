@@ -1,0 +1,9 @@
+export type Role = 'SUPER_ADMIN' | 'ADMINISTRADORA' | 'SINDICO' | 'SUBSINDICO' | 'CONSELHEIRO' | 'PORTEIRO' | 'ZELADOR' | 'FUNCIONARIO' | 'PROPRIETARIO' | 'MORADOR' | 'VISITANTE' | 'PRESTADOR';
+export type Membership = { condominioId: number | null; perfil: Role };
+export type Me = { id: number; nome: string; email: string; perfil: string; ativo: boolean; memberships: Membership[] };
+export type Session = { user: { id: string; name: string; email: string } };
+export type Condominium = { id: number; nome: string; endereco?: string | null };
+export type Unit = { id: number; condominio_id: number; bloco: string; numero: string };
+export type Occurrence = { id: number; unidade_id?: number | null; titulo: string; descricao?: string | null; status: string };
+export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
+export type Permissions = { superAdmin: boolean; roles: Role[]; permissions: Record<string, PermissionAction[]> };

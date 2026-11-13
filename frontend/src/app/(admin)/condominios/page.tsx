@@ -1,0 +1,2 @@
+import { ResourcePage } from '../../../components/resource-page';
+export default function CondominiosPage() { return <ResourcePage title="Condomínios" eyebrow="ESTRUTURA" description="Gerencie os condomínios conectados à sua conta." endpoint="/condominios" columns={[{ key: 'nome', label: 'Nome do condomínio' }, { key: 'endereco', label: 'Endereço' }, { key: 'id', label: 'Código' }]} fields={[{ key: 'nome', label: 'Nome', placeholder: 'Residencial Aurora', required: true }, { key: 'endereco', label: 'Endereço', placeholder: 'Rua, número e bairro' }]} />; }

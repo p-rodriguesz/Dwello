@@ -1,0 +1,39 @@
+{
+  "name": "api-condominio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API acadêmica de condomínio com Fastify e TypeScript",
+  "main": "dist/server.js",
+  "scripts": {
+    "setup:db": "node scripts/setup-database.js",
+    "seed": "node scripts/seed-database.js",
+    "db:reset": "node scripts/reset-database.js",
+    "db:migrate": "drizzle-kit migrate",
+    "schema:dwello": "node scripts/generate-dwello-schema.js",
+    "dev": "tsx watch src/server.ts",
+    "dev:all": "node scripts/dev-stack.js",
+    "build": "tsc",
+    "test": "tsx --test tests/api.test.ts",
+    "start": "node dist/server.js",
+    "db:local": "bash scripts/local-db.sh",
+    "seed:permissoes": "tsx scripts/seed-permissions.ts"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^10.1.8",
+    "bcrypt": "^6.0.0",
+    "better-auth": "^1.7.20",
+    "dotenv": "^18.0.5",
+    "drizzle-orm": "^0.45.3",
+    "fastify": "^5.6.0",
+    "mysql2": "^3.24.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3"
+  }
+}

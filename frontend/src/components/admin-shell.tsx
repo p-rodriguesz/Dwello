@@ -1,0 +1,3 @@
+'use client';
+import { useState } from 'react'; import { Sidebar } from './sidebar'; import { Topbar } from './topbar'; import { ProtectedPage } from './protected-page';
+export function AdminShell({ children }: { children: React.ReactNode }) { const [mobileOpen, setMobileOpen] = useState(false); return <ProtectedPage><div className="app-shell">{mobileOpen && <button className="sidebar-overlay" aria-label="Fechar menu" onClick={() => setMobileOpen(false)} />}{<div className={mobileOpen ? 'sidebar-mobile open' : 'sidebar-mobile'}><Sidebar onNavigate={() => setMobileOpen(false)} /></div>}<main className="main-shell"><Topbar onMenu={() => setMobileOpen(true)} /><div className="content-area">{children}</div></main></div></ProtectedPage>; }

@@ -1,0 +1,55 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: dwello
+      MYSQL_USER: dwello
+      MYSQL_PASSWORD: dwello
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/dwello.sql:/docker-entrypoint-initdb.d/01-dwello.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    ports:
+      - "3307:3306"
+
+  api:
+    build:
+      context: .
+    environment:
+      PORT: 3000
+      DATABASE_URL: mysql://dwello:dwello@db:3306/dwello
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Defina BETTER_AUTH_SECRET no .env}
+      BETTER_AUTH_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:3001
+      UPLOAD_DIR: /app/storage/uploads
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/storage/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        API_URL: http://api:3000
+    environment:
+      API_URL: http://api:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  mysql_data:
+  uploads_data:

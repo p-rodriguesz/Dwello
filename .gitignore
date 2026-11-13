@@ -1,0 +1,23 @@
+# Dependências e artefatos gerados
+node_modules/
+dist/
+.next/
+coverage/
+*.log
+
+# Credenciais e configurações locais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Bancos locais e metadados de ferramentas
+*.sqlite
+*.sqlite3
+*.db
+.postman/
+postman/collections/
+postman/globals/
+storage/uploads/
