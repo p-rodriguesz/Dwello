@@ -17,7 +17,10 @@
     "test": "tsx --test tests/api.test.ts",
     "start": "node dist/server.js",
     "db:local": "bash scripts/local-db.sh",
-    "seed:permissoes": "tsx scripts/seed-permissions.ts"
+    "seed:permissoes": "tsx scripts/seed-permissions.ts",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v"
   },
   "dependencies": {
     "@fastify/multipart": "^10.1.8",

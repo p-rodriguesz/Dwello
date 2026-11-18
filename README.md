@@ -25,8 +25,11 @@ Copy-Item .env.example .env
 Edite `BETTER_AUTH_SECRET` no `.env` com pelo menos 32 caracteres. Depois inicie todos os serviços:
 
 ```bash
-docker compose up --build
+npm run docker:up
 ```
+
+Se as portas padrão já estiverem em uso, ajuste `MYSQL_PORT`, `API_PORT` e `FRONTEND_PORT`
+no `.env` antes de iniciar. Exemplo: `MYSQL_PORT=3308`, `API_PORT=3002` e `FRONTEND_PORT=3003`.
 
 Endereços:
 
@@ -37,8 +40,8 @@ Endereços:
 O MySQL executa `database/dwello.sql` e `database/seed.sql` na primeira criação do volume. Para recriar o ambiente do zero:
 
 ```bash
-docker compose down -v
-docker compose up --build
+npm run docker:reset
+npm run docker:up
 ```
 
 Os volumes removidos são `mysql_data` e `uploads_data`.
@@ -270,3 +273,11 @@ Os testes verificam autenticação, sessões, RBAC, isolamento, persistência no
 Não inclua `node_modules`, `dist`, `.env`, arquivos de upload ou outros artefatos locais. O `.gitignore` já exclui esses diretórios e credenciais.
 
 Guia adicional para operar o site: [docs/GUIA-USO-SITE.md](docs/GUIA-USO-SITE.md).
+
+## Documentos acadêmicos
+
+- [Requisitos e personas](docs/REQUISITOS.md)
+- [Matriz resumida de permissões](docs/MATRIZ-PERMISSOS.md)
+- [Mapa do modelo de dados](docs/MODELO-DADOS.md)
+- [Modelo SQL editável](database/dwello.sql)
+- [Modelo Drizzle](src/db/dwello-schema.ts)

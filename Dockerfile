@@ -20,6 +20,7 @@ COPY database ./database
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build /app/dist ./dist
+RUN mkdir -p /app/storage/uploads && chown -R node:node /app/storage
 
 USER node
 EXPOSE 3000
