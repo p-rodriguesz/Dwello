@@ -21,3 +21,4 @@ coverage/
 postman/collections/
 postman/globals/
 storage/uploads/
+backend/storage/uploads/

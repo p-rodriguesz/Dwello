@@ -1,9 +1,11 @@
+export type StatusOcorrencia = 'aberta' | 'em_andamento' | 'resolvida' | 'cancelada';
+
 export interface Ocorrencia {
   id: number;
+  unidadeId: number | null;
+  usuarioId: number;
   titulo: string;
   descricao: string;
-  tipo: string;
-  status: string;
-  usuarioId: number;
-  dataCriacao: Date;
+  status: StatusOcorrencia;
+  criadoEm?: Date | null;
 }
