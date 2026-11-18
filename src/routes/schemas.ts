@@ -5,6 +5,21 @@ export const idParamsSchema = {
   additionalProperties: false
 } as const;
 
+const usuarioPerfis = [
+  'SUPER_ADMIN',
+  'ADMINISTRADORA',
+  'SINDICO',
+  'SUBSINDICO',
+  'CONSELHEIRO',
+  'PORTEIRO',
+  'ZELADOR',
+  'FUNCIONARIO',
+  'PROPRIETARIO',
+  'MORADOR',
+  'VISITANTE',
+  'PRESTADOR'
+] as const;
+
 export const usuarioCreateSchema = {
   type: 'object',
   required: ['nome', 'email'],
@@ -12,7 +27,7 @@ export const usuarioCreateSchema = {
   properties: {
     nome: { type: 'string', minLength: 1 },
     email: { type: 'string', minLength: 3 },
-    perfil: { type: 'string', enum: ['morador', 'sindico', 'porteiro', 'prestador', 'admin'] },
+    perfil: { type: 'string', enum: usuarioPerfis },
     ativo: { type: 'boolean' }
   }
 } as const;
@@ -24,7 +39,7 @@ export const usuarioUpdateSchema = {
   properties: {
     nome: { type: 'string', minLength: 1 },
     email: { type: 'string', minLength: 3 },
-    perfil: { type: 'string', enum: ['morador', 'sindico', 'porteiro', 'prestador', 'admin'] },
+    perfil: { type: 'string', enum: usuarioPerfis },
     ativo: { type: 'boolean' }
   }
 } as const;

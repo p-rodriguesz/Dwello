@@ -5,6 +5,7 @@ import path from 'node:path';
 import { app } from '../src/app';
 import { pool } from '../src/db';
 import { env } from '../src/config/env';
+import { RBAC_MATRIX, RBAC_ROLES } from '../src/auth/rbac';
 
 describe('autenticação e RBAC', () => {
   const suffix = Date.now();
@@ -47,6 +48,17 @@ describe('autenticação e RBAC', () => {
     await pool?.query('DELETE FROM account WHERE userId IN (SELECT id FROM user WHERE email = ?)', [email]);
     await pool?.query('DELETE FROM user WHERE email = ?', [email]);
     await app.close();
+  });
+
+  it('expõe a matriz oficial dos 12 cargos', () => {
+    assert.equal(RBAC_ROLES.length, 12);
+    for (const role of RBAC_ROLES) {
+      assert.ok(RBAC_MATRIX[role], `Matriz ausente para ${role}`);
+    }
+    assert.ok(RBAC_MATRIX.SUPER_ADMIN.condominios?.includes('create'));
+    assert.ok(!RBAC_MATRIX.MORADOR.condominios?.includes('create'));
+    assert.ok(RBAC_MATRIX.SINDICO.unidades?.includes('create'));
+    assert.ok(RBAC_MATRIX.ADMINISTRADORA.contas_pagar?.includes('read'));
   });
 
   it('persiste sessão, protege rotas e encerra sessão', async () => {

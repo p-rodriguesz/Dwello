@@ -15,8 +15,34 @@ type UsuarioRequest = FastifyRequest<{ Body: UsuarioBody }>;
 type UsuarioUpdateRequest = FastifyRequest<{ Params: { id: string }; Body: UsuarioBody }>;
 type BuscaRequest = FastifyRequest<{ Querystring: { q?: string } }>;
 
-const perfis = new Set(['morador', 'sindico', 'porteiro', 'prestador', 'admin']);
-const perfilValues = ['morador', 'sindico', 'porteiro', 'prestador', 'admin'] as const;
+const perfis = new Set([
+  'SUPER_ADMIN',
+  'ADMINISTRADORA',
+  'SINDICO',
+  'SUBSINDICO',
+  'CONSELHEIRO',
+  'PORTEIRO',
+  'ZELADOR',
+  'FUNCIONARIO',
+  'PROPRIETARIO',
+  'MORADOR',
+  'VISITANTE',
+  'PRESTADOR'
+]);
+const perfilValues = [
+  'SUPER_ADMIN',
+  'ADMINISTRADORA',
+  'SINDICO',
+  'SUBSINDICO',
+  'CONSELHEIRO',
+  'PORTEIRO',
+  'ZELADOR',
+  'FUNCIONARIO',
+  'PROPRIETARIO',
+  'MORADOR',
+  'VISITANTE',
+  'PRESTADOR'
+] as const;
 
 function isEmail(value: unknown): value is string {
   return isNonEmptyString(value) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -40,7 +66,7 @@ export async function buscarUsuarioPorId(request: IdRequest, reply: FastifyReply
 }
 
 export async function criarUsuario(request: UsuarioRequest, reply: FastifyReply) {
-  const { nome, email, perfil = 'morador', ativo = true } = request.body ?? {};
+  const { nome, email, perfil = 'MORADOR', ativo = true } = request.body ?? {};
   if (!isNonEmptyString(nome) || !isEmail(email) || typeof perfil !== 'string' || !perfis.has(perfil) || typeof ativo !== 'boolean') {
     return invalidData(reply);
   }

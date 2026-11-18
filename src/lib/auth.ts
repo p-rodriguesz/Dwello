@@ -57,7 +57,7 @@ export const auth = pool && env.betterAuthSecret
                   nome: user.name,
                   email: user.email,
                   senhaHash: null,
-                  perfil: 'morador',
+                  perfil: 'MORADOR',
                   ativo: true
                 }).$returningId();
                 usuarioId = inserted.id;

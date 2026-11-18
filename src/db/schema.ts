@@ -53,14 +53,21 @@ export const usuarios = mysqlTable('usuarios', {
   authUserId: varchar('auth_user_id', { length: 64 }).unique(),
   senhaHash: varchar('senha_hash', { length: 255 }),
   perfil: mysqlEnum('perfil', [
-    'morador',
-    'sindico',
-    'porteiro',
-    'prestador',
-    'admin'
+    'SUPER_ADMIN',
+    'ADMINISTRADORA',
+    'SINDICO',
+    'SUBSINDICO',
+    'CONSELHEIRO',
+    'PORTEIRO',
+    'ZELADOR',
+    'FUNCIONARIO',
+    'PROPRIETARIO',
+    'MORADOR',
+    'VISITANTE',
+    'PRESTADOR'
   ])
     .notNull()
-    .default('morador'),
+    .default('MORADOR'),
   ativo: boolean('ativo').notNull().default(true),
   criadoEm: timestamp('criado_em').defaultNow()
 });
