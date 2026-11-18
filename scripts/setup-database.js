@@ -172,8 +172,23 @@ async function setupDatabase() {
     }
     if (await tableExists(connection, 'usuario_perfis')) {
       await connection.query(
-        `UPDATE usuario_perfis SET perfil = UPPER(perfil)
-         WHERE perfil IS NOT NULL AND perfil REGEXP '^[[:lower:][:digit:]_-]+$'`
+        `UPDATE usuario_perfis SET perfil = CASE LOWER(perfil)
+          WHEN 'admin' THEN 'SUPER_ADMIN'
+          WHEN 'super_admin' THEN 'SUPER_ADMIN'
+          WHEN 'administradora' THEN 'ADMINISTRADORA'
+          WHEN 'sindico' THEN 'SINDICO'
+          WHEN 'subsindico' THEN 'SUBSINDICO'
+          WHEN 'conselheiro' THEN 'CONSELHEIRO'
+          WHEN 'porteiro' THEN 'PORTEIRO'
+          WHEN 'zelador' THEN 'ZELADOR'
+          WHEN 'funcionario' THEN 'FUNCIONARIO'
+          WHEN 'proprietario' THEN 'PROPRIETARIO'
+          WHEN 'prestador' THEN 'PRESTADOR'
+          WHEN 'visitante' THEN 'VISITANTE'
+          WHEN 'morador' THEN 'MORADOR'
+          ELSE UPPER(perfil)
+        END
+        WHERE perfil IS NOT NULL`
       );
     }
     await applyForeignKeys(connection, source);

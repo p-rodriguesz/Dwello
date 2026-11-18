@@ -18,8 +18,8 @@ ON DUPLICATE KEY UPDATE identificacao = VALUES(identificacao), status = VALUES(s
 -- Não contém senha: cadastre-se no app com este e-mail e o Better Auth
 -- vincula a conta a este perfil. Troque o e-mail aqui se quiser usar outro.
 INSERT INTO usuarios (nome, email, perfil, ativo, status, created_at, updated_at)
-VALUES ('Administrador', 'admin@dwello.local', 'admin', TRUE, 'ATIVO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-ON DUPLICATE KEY UPDATE perfil = 'admin', ativo = TRUE;
+VALUES ('Administrador', 'admin@dwello.local', 'SUPER_ADMIN', TRUE, 'ATIVO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE perfil = 'SUPER_ADMIN', ativo = TRUE;
 
 INSERT INTO usuario_perfis (usuario_id, condominio_id, perfil, ativo, created_at, updated_at)
 SELECT u.id, NULL, 'SUPER_ADMIN', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
