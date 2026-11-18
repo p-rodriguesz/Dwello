@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Dwello API",
-    "description": "Colecao completa: auth, usuarios, uploads e CRUD dos 135 recursos Dwello. Listagens suportam q, page e pageSize.",
+    "description": "Colecao abrangente: health, autenticacao, sessao, usuarios, RBAC, metadados, CRUD dos recursos centrais e dos 135 recursos Dwello, uploads e paginacao.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -443,6 +443,531 @@
             "exec": [
               "pm.test('Logout realizado', () => pm.response.to.have.status(200));"
             ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cobertura dos recursos centrais",
+      "item": [
+        {
+          "name": "CRUD condominios",
+          "item": [
+            {
+              "name": "Listar condominios",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/condominios"
+              }
+            },
+            {
+              "name": "Buscar condominios por ID",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/condominios/1"
+              }
+            },
+            {
+              "name": "Criar condominios",
+              "request": {
+                "method": "POST",
+                "url": "{{baseUrl}}/condominios",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"nome\": \"Condomínio API\", \"endereco\": \"Rua Central, 100\" }"
+                }
+              }
+            },
+            {
+              "name": "Atualizar condominios",
+              "request": {
+                "method": "PUT",
+                "url": "{{baseUrl}}/condominios/1",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Excluir condominios",
+              "request": {
+                "method": "DELETE",
+                "url": "{{baseUrl}}/condominios/1"
+              }
+            }
+          ]
+        },
+        {
+          "name": "CRUD unidades",
+          "item": [
+            {
+              "name": "Listar unidades",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/unidades"
+              }
+            },
+            {
+              "name": "Buscar unidades por ID",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/unidades/1"
+              }
+            },
+            {
+              "name": "Criar unidades",
+              "request": {
+                "method": "POST",
+                "url": "{{baseUrl}}/unidades",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"condominio_id\": {{condominioId}}, \"bloco\": \"A\", \"numero\": \"101\" }"
+                }
+              }
+            },
+            {
+              "name": "Atualizar unidades",
+              "request": {
+                "method": "PUT",
+                "url": "{{baseUrl}}/unidades/1",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Excluir unidades",
+              "request": {
+                "method": "DELETE",
+                "url": "{{baseUrl}}/unidades/1"
+              }
+            }
+          ]
+        },
+        {
+          "name": "CRUD moradores",
+          "item": [
+            {
+              "name": "Listar moradores",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/moradores"
+              }
+            },
+            {
+              "name": "Buscar moradores por ID",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/moradores/1"
+              }
+            },
+            {
+              "name": "Criar moradores",
+              "request": {
+                "method": "POST",
+                "url": "{{baseUrl}}/moradores",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"usuario_id\": {{usuarioId}}, \"unidade_id\": {{unidadeId}}, \"tipo_vinculo\": \"morador\" }"
+                }
+              }
+            },
+            {
+              "name": "Atualizar moradores",
+              "request": {
+                "method": "PUT",
+                "url": "{{baseUrl}}/moradores/1",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Excluir moradores",
+              "request": {
+                "method": "DELETE",
+                "url": "{{baseUrl}}/moradores/1"
+              }
+            }
+          ]
+        },
+        {
+          "name": "CRUD ocorrencias",
+          "item": [
+            {
+              "name": "Listar ocorrencias",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/ocorrencias"
+              }
+            },
+            {
+              "name": "Buscar ocorrencias por ID",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/ocorrencias/1"
+              }
+            },
+            {
+              "name": "Criar ocorrencias",
+              "request": {
+                "method": "POST",
+                "url": "{{baseUrl}}/ocorrencias",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"usuario_id\": {{usuarioId}}, \"unidade_id\": {{unidadeId}}, \"titulo\": \"Ocorrência\", \"descricao\": \"Teste\", \"status\": \"aberta\" }"
+                }
+              }
+            },
+            {
+              "name": "Atualizar ocorrencias",
+              "request": {
+                "method": "PUT",
+                "url": "{{baseUrl}}/ocorrencias/1",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Excluir ocorrencias",
+              "request": {
+                "method": "DELETE",
+                "url": "{{baseUrl}}/ocorrencias/1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuários e papéis",
+      "item": [
+        {
+          "name": "Listar usuários",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/usuarios?q=&page=1&pageSize=10"
+          }
+        },
+        {
+          "name": "Buscar usuário por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/usuarios/1"
+          }
+        },
+        {
+          "name": "Criar usuário",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/usuarios",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nome\": \"Usuário API\", \"email\": \"usuario@example.com\", \"perfil\": \"MORADOR\", \"ativo\": true }"
+            }
+          }
+        },
+        {
+          "name": "Atualizar usuário",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/usuarios/1",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nome\": \"Usuário Atualizado\" }"
+            }
+          }
+        },
+        {
+          "name": "Excluir usuário",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/usuarios/1"
+          }
+        },
+        {
+          "name": "Listar usuários e papéis",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/usuarios/papeis"
+          }
+        },
+        {
+          "name": "Alterar papel",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/usuarios/1/papel",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"perfil\": \"MORADOR\", \"condominio_id\": {{condominioId}} }"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessão e metadados",
+      "item": [
+        {
+          "name": "Encerrar sessão",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/sign-out"
+          }
+        },
+        {
+          "name": "Permissões do usuário atual",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/permissoes"
+          }
+        },
+        {
+          "name": "Metadados de condomínio",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meta/recursos/condominios"
+          }
+        },
+        {
+          "name": "Metadados de unidade",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meta/recursos/unidades"
+          }
+        },
+        {
+          "name": "Metadados de morador",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meta/recursos/moradores"
+          }
+        },
+        {
+          "name": "Metadados de ocorrência",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meta/recursos/ocorrencias"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads completos",
+      "item": [
+        {
+          "name": "Enviar documento",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/uploads/documentos/{{documentoId}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Baixar documento",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/documentos/{{documentoId}}"
+          }
+        },
+        {
+          "name": "Enviar anexo de manifestação",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/uploads/manifestacoes/1/anexos",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Baixar anexo de manifestação",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/anexos-manifestacoes/1"
+          }
+        },
+        {
+          "name": "Enviar evidência de ocorrência",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/uploads/ocorrencias-seguranca/1/evidencias",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Baixar evidência de ocorrência",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/evidencias-ocorrencias/1"
+          }
+        },
+        {
+          "name": "Enviar foto de visitante",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/uploads/visitantes/1/foto",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Baixar foto de visitante",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/visitantes/1/foto"
+          }
+        },
+        {
+          "name": "Enviar foto de encomenda",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/uploads/encomendas/1/foto",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Baixar foto de encomenda",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/encomendas/1/foto"
+          }
+        },
+        {
+          "name": "Enviar comprovante",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/uploads/pagamentos-fornecedores/1/comprovante",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Baixar comprovante",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/pagamentos-fornecedores/1/comprovante"
           }
         }
       ]
