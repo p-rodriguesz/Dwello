@@ -55,7 +55,7 @@ describe('autenticação e RBAC', () => {
     const me = await app.inject({ method: 'GET', url: '/me', headers: headers() });
     assert.equal(me.statusCode, 200, me.body);
     assert.equal(me.json().email, email);
-    assert.equal(me.json().memberships[0].perfil, 'SUPER_ADMIN');
+    assert.ok(me.json().memberships.some((membership: { perfil: string }) => membership.perfil === 'SUPER_ADMIN'));
     const [stored] = await pool!.query('SELECT id FROM session WHERE token = ?', [session.json().session.token]);
     assert.equal((stored as unknown[]).length, 1);
     assert.equal((await app.inject({ method: 'GET', url: '/usuarios' })).statusCode, 401);

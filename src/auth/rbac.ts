@@ -154,7 +154,7 @@ export async function authorizeResource(request: FastifyRequest, resource: RbacR
     }
     return { context, condominioIds: allowedCondominios(context) };
   }
-  const memberships = context.memberships.filter((m) => m.condominio_id === null || m.condominio_id === condominioId);
+  const memberships = context.memberships.filter((m) => m.condominio_id === condominioId);
   if (!memberships.some((m) => roleAllows(permissions, m.perfil, resource, action))) {
     throw new AppError(403, 'Acesso negado para este papel e condomínio.', 'FORBIDDEN');
   }
