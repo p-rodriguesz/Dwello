@@ -31,6 +31,15 @@ const compatibilityColumns = {
     ativo: 'BOOLEAN NOT NULL DEFAULT TRUE',
     criado_em: 'DATETIME NULL'
   },
+  visitantes: {
+    foto_url: 'VARCHAR(255) NULL'
+  },
+  encomendas: {
+    foto_url: 'VARCHAR(255) NULL'
+  },
+  pagamentos_fornecedores: {
+    comprovante_url: 'VARCHAR(255) NULL'
+  },
   moradores: {
     condominio_id: 'INT NULL',
     pessoa_id: 'INT NULL',

@@ -1,5 +1,51 @@
 // Gerado a partir de database/dwello.sql. Não editar manualmente.
-import { boolean, char, date, datetime, decimal, int, json, mysqlTable, primaryKey, text, timestamp, varchar } from 'drizzle-orm/mysql-core';
+import { boolean, char, date, datetime, decimal, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from 'drizzle-orm/mysql-core';
+
+export const user = mysqlTable("user", {
+    id: varchar('id', { length: 36 }).primaryKey(),
+    name: varchar('name', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    emailVerified: boolean('emailVerified').notNull(),
+    image: text('image'),
+    createdAt: datetime('createdAt').notNull(),
+    updatedAt: datetime('updatedAt').notNull()
+});
+
+export const session = mysqlTable("session", {
+    id: varchar('id', { length: 36 }).primaryKey(),
+    expiresAt: datetime('expiresAt').notNull(),
+    token: varchar('token', { length: 255 }).notNull().unique(),
+    createdAt: datetime('createdAt').notNull(),
+    updatedAt: datetime('updatedAt').notNull(),
+    ipAddress: varchar('ipAddress', { length: 45 }),
+    userAgent: text('userAgent'),
+    userId: varchar('userId', { length: 36 }).notNull()
+});
+
+export const account = mysqlTable("account", {
+    id: varchar('id', { length: 36 }).primaryKey(),
+    accountId: varchar('accountId', { length: 255 }).notNull(),
+    providerId: varchar('providerId', { length: 255 }).notNull(),
+    userId: varchar('userId', { length: 36 }).notNull(),
+    accessToken: text('accessToken'),
+    refreshToken: text('refreshToken'),
+    idToken: text('idToken'),
+    accessTokenExpiresAt: datetime('accessTokenExpiresAt'),
+    refreshTokenExpiresAt: datetime('refreshTokenExpiresAt'),
+    scope: text('scope'),
+    password: text('password'),
+    createdAt: datetime('createdAt').notNull(),
+    updatedAt: datetime('updatedAt').notNull()
+});
+
+export const verification = mysqlTable("verification", {
+    id: varchar('id', { length: 36 }).primaryKey(),
+    identifier: varchar('identifier', { length: 255 }).notNull(),
+    value: varchar('value', { length: 255 }).notNull(),
+    expiresAt: datetime('expiresAt').notNull(),
+    createdAt: datetime('createdAt'),
+    updatedAt: datetime('updatedAt')
+});
 
 export const condominios = mysqlTable("condominios", {
     id: int('id').primaryKey(),
@@ -7,7 +53,9 @@ export const condominios = mysqlTable("condominios", {
     cnpj: varchar('cnpj', { length: 18 }).unique(),
     tipoCondominioId: int('tipo_condominio_id'),
     enderecoId: int('endereco_id'),
+    endereco: varchar('endereco', { length: 255 }),
     status: varchar('status', { length: 30 }),
+    criadoEm: datetime('criado_em'),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
 });
@@ -60,6 +108,8 @@ export const unidades = mysqlTable("unidades", {
     condominioId: int('condominio_id'),
     blocoId: int('bloco_id'),
     tipoUnidadeId: int('tipo_unidade_id'),
+    bloco: varchar('bloco', { length: 50 }),
+    numero: varchar('numero', { length: 20 }),
     identificacao: varchar('identificacao', { length: 30 }),
     areaM2: decimal('area_m2', { precision: 10, scale: 2 }),
     status: varchar('status', { length: 30 }),
@@ -89,10 +139,15 @@ export const usuarios = mysqlTable("usuarios", {
     id: int('id').primaryKey(),
     condominioId: int('condominio_id'),
     pessoaId: int('pessoa_id'),
+    authUserId: varchar('auth_user_id', { length: 64 }).unique(),
+    nome: varchar('nome', { length: 150 }),
     email: varchar('email', { length: 190 }).unique(),
     senhaHash: varchar('senha_hash', { length: 255 }),
+    perfil: varchar('perfil', { length: 30 }),
+    ativo: boolean('ativo').notNull(),
     status: varchar('status', { length: 30 }),
     ultimoAcessoEm: datetime('ultimo_acesso_em'),
+    criadoEm: datetime('criado_em'),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
 });
@@ -130,6 +185,9 @@ export const moradores = mysqlTable("moradores", {
     id: int('id').primaryKey(),
     condominioId: int('condominio_id'),
     pessoaId: int('pessoa_id'),
+    usuarioId: int('usuario_id'),
+    unidadeId: int('unidade_id'),
+    tipoVinculo: varchar('tipo_vinculo', { length: 30 }),
     dataInicio: date('data_inicio'),
     dataFim: date('data_fim'),
     createdAt: datetime('created_at'),
@@ -178,6 +236,9 @@ export const usuarioPerfis = mysqlTable("usuario_perfis", {
     usuarioId: int('usuario_id'),
     perfilId: int('perfil_id'),
     condominioId: int('condominio_id'),
+    perfil: varchar('perfil', { length: 30 }),
+    ativo: boolean('ativo').notNull(),
+    criadoEm: datetime('criado_em'),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
 });
@@ -1645,4 +1706,15 @@ export const execucoesAutomacao = mysqlTable("execucoes_automacao", {
     resultado: text('resultado'),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
+});
+
+export const ocorrencias = mysqlTable("ocorrencias", {
+    id: int('id').primaryKey(),
+    unidadeId: int('unidade_id'),
+    usuarioId: int('usuario_id').notNull(),
+    titulo: varchar('titulo', { length: 150 }).notNull(),
+    descricao: text('descricao').notNull(),
+    status: mysqlEnum('status', ["aberta", "em_andamento", "resolvida", "cancelada"]).notNull(),
+    criadoEm: timestamp('criado_em'),
+    atualizadoEm: timestamp('atualizado_em')
 });

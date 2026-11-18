@@ -8,6 +8,13 @@
       "when": 1794371212534,
       "tag": "0000_early_vivisector",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1795020000000,
+      "tag": "0001_upload_columns",
+      "breakpoints": true
     }
   ]
 }

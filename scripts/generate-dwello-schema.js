@@ -16,6 +16,11 @@ const typeMap = (type, name) => {
   if (char) return `char('${name}', { length: ${char[1]} })`;
   const decimal = lower.match(/^decimal\((\d+),(\d+)\)/);
   if (decimal) return `decimal('${name}', { precision: ${decimal[1]}, scale: ${decimal[2]} })`;
+  const enumType = lower.match(/^enum\((.*)\)$/);
+  if (enumType) {
+    const values = enumType[1].match(/'([^']*)'/g)?.map((value) => value.slice(1, -1));
+    if (values?.length) return `mysqlEnum('${name}', [${values.map((value) => JSON.stringify(value)).join(', ')}])`;
+  }
   throw new Error(`Tipo não suportado: ${type}`);
 };
 const camel = (name) => name.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
@@ -37,7 +42,7 @@ while ((tableMatch = tablePattern.exec(sql))) {
   if (!columns.length) continue;
   tables.push(`export const ${camel(tableName)} = mysqlTable(${quote(tableName)}, {\n${columns.join(',\n')}\n});`);
 }
-if (tables.length !== 151) throw new Error(`Esperadas 151 tabelas, encontradas ${tables.length}`);
-const header = `// Gerado a partir de database/dwello.sql. Não editar manualmente.\nimport { boolean, char, date, datetime, decimal, int, json, mysqlTable, primaryKey, text, timestamp, varchar } from 'drizzle-orm/mysql-core';\n\n`;
+if (tables.length !== 156) throw new Error(`Esperadas 156 tabelas, encontradas ${tables.length}`);
+const header = `// Gerado a partir de database/dwello.sql. Não editar manualmente.\nimport { boolean, char, date, datetime, decimal, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from 'drizzle-orm/mysql-core';\n\n`;
 fs.writeFileSync('src/db/dwello-schema.ts', header + tables.join('\n\n') + '\n');
 console.log(`Schema gerado com ${tables.length} tabelas.`);
