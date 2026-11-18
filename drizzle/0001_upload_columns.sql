@@ -51,6 +51,19 @@ CREATE TABLE IF NOT EXISTS `ocorrencias` (
   CONSTRAINT `ocorrencias_unidade_fk` FOREIGN KEY (`unidade_id`) REFERENCES `unidades` (`id`),
   CONSTRAINT `ocorrencias_usuario_fk` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
 );
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `evidencias_manutencao` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `condominio_id` int,
+  `ordem_servico_id` int,
+  `arquivo_url` varchar(500),
+  `nome_arquivo` varchar(255),
+  `tipo` varchar(50),
+  `created_at` datetime,
+  `updated_at` datetime,
+  CONSTRAINT `evidencias_manutencao_condominio_fk` FOREIGN KEY (`condominio_id`) REFERENCES `condominios` (`id`),
+  CONSTRAINT `evidencias_manutencao_ordem_fk` FOREIGN KEY (`ordem_servico_id`) REFERENCES `ordens_servico` (`id`)
+);
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` varchar(36) PRIMARY KEY,

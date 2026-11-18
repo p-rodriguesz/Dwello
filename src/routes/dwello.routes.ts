@@ -13,6 +13,7 @@ const resources: DwelloResource[] = [
   'encomendas', 'transportadoras', 'retiradas_encomendas', 'prestadores', 'empresas_prestadoras', 'acessos_prestadores',
   'credenciais_acesso', 'registros_acesso', 'dispositivos_acesso', 'chaves', 'retiradas_chaves', 'historico_chaves',
   'ocorrencias_seguranca', 'envolvidos_ocorrencias', 'evidencias_ocorrencias', 'cameras', 'incidentes', 'registros_monitoramento',
+  'evidencias_manutencao',
   'comunicados', 'destinatarios_comunicados', 'leituras_comunicados', 'notificacoes', 'preferencias_notificacao', 'historico_notificacoes',
   ...NEW_DWELLO_RESOURCES
 ];

@@ -42,7 +42,7 @@ while ((tableMatch = tablePattern.exec(sql))) {
   if (!columns.length) continue;
   tables.push(`export const ${camel(tableName)} = mysqlTable(${quote(tableName)}, {\n${columns.join(',\n')}\n});`);
 }
-if (tables.length !== 156) throw new Error(`Esperadas 156 tabelas, encontradas ${tables.length}`);
+if (tables.length !== 157) throw new Error(`Esperadas 157 tabelas, encontradas ${tables.length}`);
 const header = `// Gerado a partir de database/dwello.sql. Não editar manualmente.\nimport { boolean, char, date, datetime, decimal, int, json, mysqlEnum, mysqlTable, primaryKey, text, timestamp, varchar } from 'drizzle-orm/mysql-core';\n\n`;
 fs.writeFileSync('src/db/dwello-schema.ts', header + tables.join('\n\n') + '\n');
 console.log(`Schema gerado com ${tables.length} tabelas.`);

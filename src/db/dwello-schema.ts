@@ -1239,6 +1239,17 @@ export const historicoOrdensServico = mysqlTable("historico_ordens_servico", {
     updatedAt: datetime('updated_at')
 });
 
+export const evidenciasManutencao = mysqlTable("evidencias_manutencao", {
+    id: int('id').primaryKey(),
+    condominioId: int('condominio_id'),
+    ordemServicoId: int('ordem_servico_id'),
+    arquivoUrl: varchar('arquivo_url', { length: 500 }),
+    nomeArquivo: varchar('nome_arquivo', { length: 255 }),
+    tipo: varchar('tipo', { length: 50 }),
+    createdAt: datetime('created_at'),
+    updatedAt: datetime('updated_at')
+});
+
 export const ativos = mysqlTable("ativos", {
     id: int('id').primaryKey(),
     condominioId: int('condominio_id'),

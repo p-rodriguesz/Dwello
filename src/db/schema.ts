@@ -252,6 +252,9 @@ export const envolvidosOcorrencias = mysqlTable('envolvidos_ocorrencias', {
 export const evidenciasOcorrencias = mysqlTable('evidencias_ocorrencias', {
   id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), ocorrenciaId: int('ocorrencia_id'), arquivoUrl: varchar('arquivo_url', { length: 500 }), tipo: varchar('tipo', { length: 50 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
 });
+export const evidenciasManutencao = mysqlTable('evidencias_manutencao', {
+  id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), ordemServicoId: int('ordem_servico_id'), arquivoUrl: varchar('arquivo_url', { length: 500 }), nomeArquivo: varchar('nome_arquivo', { length: 255 }), tipo: varchar('tipo', { length: 50 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
+});
 export const cameras = mysqlTable('cameras', {
   id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), nome: varchar('nome', { length: 100 }), localizacao: varchar('localizacao', { length: 150 }), status: varchar('status', { length: 30 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
 });

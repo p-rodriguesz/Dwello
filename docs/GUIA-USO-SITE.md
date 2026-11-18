@@ -91,6 +91,20 @@ Uploads são feitos pelas rotas de arquivos e não pelo formulário genérico da
 aceitos são PDF, JPG, JPEG, PNG e WEBP, com limite padrão de 10 MB. Arquivos privados exigem
 sessão e permissão no condomínio associado.
 
+Arquivos disponíveis:
+
+- Foto de visitante em `POST /uploads/visitantes/:visitanteId/foto`.
+- Foto da encomenda recebida em `POST /uploads/encomendas/:encomendaId/foto`.
+- Comprovante de pagamento em `POST /uploads/pagamentos-fornecedores/:pagamentoId/comprovante`.
+- Documento do condomínio em `POST /uploads/documentos/:documentoId`.
+- Evidências de ocorrência em `POST /uploads/ocorrencias-seguranca/:ocorrenciaId/evidencias`.
+- Evidências de manutenção em `POST /uploads/ordens-servico/:ordemId/evidencias`.
+
+As telas genéricas de visitantes, encomendas, documentos, manifestações, ocorrências de segurança,
+pagamentos e ordens de serviço oferecem o campo de envio de arquivo. O envio usa
+`multipart/form-data`; o arquivo é salvo em diretórios separados por condomínio, categoria e ano/mês.
+Downloads privados passam novamente pela sessão, pelo RBAC e pelo condomínio associado.
+
 ## 7. Problemas comuns
 
 ### `ECONNREFUSED ::1:3000` ou `127.0.0.1:3000`

@@ -10,6 +10,15 @@ type Row = Record<string, unknown>;
 const PAGE_SIZE = 10;
 const HIDDEN_COLUMNS = new Set(['createdAt', 'updatedAt']);
 const camel = (key: string) => key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+const UPLOAD_ENDPOINTS: Record<string, (id: number) => string> = {
+  visitantes: (id) => `/uploads/visitantes/${id}/foto`,
+  encomendas: (id) => `/uploads/encomendas/${id}/foto`,
+  documentos: (id) => `/uploads/documentos/${id}`,
+  manifestacoes: (id) => `/uploads/manifestacoes/${id}/anexos`,
+  ocorrencias_seguranca: (id) => `/uploads/ocorrencias-seguranca/${id}/evidencias`,
+  ordens_servico: (id) => `/uploads/ordens-servico/${id}/evidencias`,
+  pagamentos_fornecedores: (id) => `/uploads/pagamentos-fornecedores/${id}/comprovante`
+};
 
 function formatValue(value: unknown) {
   if (value === null || value === undefined || value === '') return '—';
@@ -41,6 +50,9 @@ export default function ModuloPage() {
   const [form, setForm] = useState<Record<string, string | boolean>>({});
   const [saving, setSaving] = useState(false);
   const [total, setTotal] = useState(0);
+  const [uploadId, setUploadId] = useState<number | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const load = async () => {
     setLoading(true); setError('');
@@ -90,6 +102,24 @@ export default function ModuloPage() {
     try { await api.delete(`${endpoint}/${row.id}`); await load(); } catch (cause) { setError(apiMessage(cause)); }
   };
 
+  const upload = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!uploadId || !uploadFile) return;
+    const endpointForUpload = UPLOAD_ENDPOINTS[recurso];
+    if (!endpointForUpload) return;
+    setUploading(true); setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      await api.post(endpointForUpload(uploadId), formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setUploadFile(null); setUploadId(null);
+      await load();
+    } catch (cause) { setError(apiMessage(cause, 'Não foi possível enviar o arquivo.')); }
+    finally { setUploading(false); }
+  };
+
   if (!sessionLoading && !can.read) {
     return <div className="resource-page"><div className="form-error">Seu cargo não tem acesso a {title.toLowerCase()}.</div></div>;
   }
@@ -113,6 +143,12 @@ export default function ModuloPage() {
       <label className="search-field"><span>⌕</span><input value={filter} onChange={(e) => { setFilter(e.target.value); setPage(1); }} placeholder={`Filtrar ${title.toLowerCase()}...`} /></label>
       <button type="button" className="outline-button" onClick={() => void load()} disabled={loading}>↻ Atualizar</button>
     </div>
+    {UPLOAD_ENDPOINTS[recurso] && <form className="inline-form module-form" onSubmit={upload}>
+      <strong className="module-form-title">Enviar arquivo ao registro</strong>
+      <label>Registro (ID)<input type="number" min="1" value={uploadId ?? ''} onChange={(event) => setUploadId(event.target.value ? Number(event.target.value) : null)} required /></label>
+      <label>Arquivo (JPG, JPEG, PNG, WEBP ou PDF; até 10 MB)<input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)} required /></label>
+      <div className="module-form-actions"><button type="button" className="outline-button" onClick={() => { setUploadId(null); setUploadFile(null); }}>Limpar</button><button className="primary-button compact" disabled={uploading}>{uploading ? 'Enviando...' : 'Enviar arquivo'}</button></div>
+    </form>}
     <div className="panel table-panel">
       {loading ? <div className="empty-state"><span className="spinner" /> Carregando dados...</div>
         : visible.length === 0 ? <div className="empty-state"><span>⌁</span><strong>{filter ? 'Nenhum resultado encontrado' : 'Nenhum registro encontrado'}</strong></div>

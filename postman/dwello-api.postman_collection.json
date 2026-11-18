@@ -9132,6 +9132,64 @@
           }
         },
         {
+          "name": "Documento do condomínio",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/uploads/documentos/{{documentoId}}"
+          }
+        },
+        {
+          "name": "Foto de ocorrência",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/uploads/ocorrencias-seguranca/1/evidencias"
+          }
+        },
+        {
+          "name": "Foto de manutenção",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/uploads/ordens-servico/1/evidencias"
+          }
+        },
+        {
+          "name": "Recuperar foto de manutenção",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/evidencias-manutencao/1"
+          }
+        },
+        {
           "name": "Anexo manifestacao",
           "request": {
             "method": "POST",

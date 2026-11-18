@@ -1245,6 +1245,17 @@ CREATE TABLE `historico_ordens_servico` (
   `updated_at` datetime
 );
 
+CREATE TABLE `evidencias_manutencao` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `condominio_id` int,
+  `ordem_servico_id` int,
+  `arquivo_url` varchar(500),
+  `nome_arquivo` varchar(255),
+  `tipo` varchar(50),
+  `created_at` datetime,
+  `updated_at` datetime
+);
+
 CREATE TABLE `ativos` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `condominio_id` int,
@@ -2167,6 +2178,10 @@ ALTER TABLE `historico_ordens_servico` ADD FOREIGN KEY (`condominio_id`) REFEREN
 ALTER TABLE `historico_ordens_servico` ADD FOREIGN KEY (`ordem_servico_id`) REFERENCES `ordens_servico` (`id`);
 
 ALTER TABLE `historico_ordens_servico` ADD FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
+
+ALTER TABLE `evidencias_manutencao` ADD FOREIGN KEY (`condominio_id`) REFERENCES `condominios` (`id`);
+
+ALTER TABLE `evidencias_manutencao` ADD FOREIGN KEY (`ordem_servico_id`) REFERENCES `ordens_servico` (`id`);
 
 ALTER TABLE `ativos` ADD FOREIGN KEY (`condominio_id`) REFERENCES `condominios` (`id`);
 

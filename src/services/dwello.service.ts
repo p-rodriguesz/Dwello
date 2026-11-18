@@ -12,7 +12,8 @@ import {
   dispositivosAcesso, chaves, retiradasChaves, historicoChaves,
   ocorrenciasSeguranca, envolvidosOcorrencias, evidenciasOcorrencias, cameras,
   incidentes, registrosMonitoramento, comunicados, destinatariosComunicados,
-  leiturasComunicados, notificacoes, preferenciasNotificacao, historicoNotificacoes
+  leiturasComunicados, notificacoes, preferenciasNotificacao, historicoNotificacoes,
+  evidenciasManutencao
 } from '../db/schema.js';
 import * as generatedSchema from '../db/dwello-schema.js';
 
@@ -55,7 +56,7 @@ export type DwelloResource =
   | 'ocorrencias_seguranca' | 'envolvidos_ocorrencias' | 'evidencias_ocorrencias'
   | 'cameras' | 'incidentes' | 'registros_monitoramento' | 'comunicados'
   | 'destinatarios_comunicados' | 'leituras_comunicados' | 'notificacoes'
-  | 'preferencias_notificacao' | 'historico_notificacoes' | NewDwelloResource;
+  | 'preferencias_notificacao' | 'historico_notificacoes' | 'evidencias_manutencao' | NewDwelloResource;
 
 type Table = any;
 type Definition = { table: Table; scoped: boolean };
@@ -86,6 +87,7 @@ export const dwelloDefinitions = {
   cameras: { table: cameras, scoped: true }, incidentes: { table: incidentes, scoped: true }, registros_monitoramento: { table: registrosMonitoramento, scoped: true },
   comunicados: { table: comunicados, scoped: true }, destinatarios_comunicados: { table: destinatariosComunicados, scoped: true }, leituras_comunicados: { table: leiturasComunicados, scoped: true },
   notificacoes: { table: notificacoes, scoped: true }, preferencias_notificacao: { table: preferenciasNotificacao, scoped: true }, historico_notificacoes: { table: historicoNotificacoes, scoped: true },
+  evidencias_manutencao: { table: evidenciasManutencao, scoped: true },
   ...Object.fromEntries(NEW_DWELLO_RESOURCES.map((resource) => {
     const exportName = resource.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
     const table = (generatedSchema as unknown as Record<string, Table>)[exportName];

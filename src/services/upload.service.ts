@@ -20,7 +20,7 @@ const allowedTypes: Record<string, string[]> = {
   '.pdf': ['application/pdf']
 };
 
-type UploadTarget = 'documentos' | 'anexos_manifestacoes' | 'evidencias_ocorrencias' | 'visitantes' | 'encomendas' | 'pagamentos_fornecedores';
+type UploadTarget = 'documentos' | 'anexos_manifestacoes' | 'evidencias_ocorrencias' | 'evidencias_manutencao' | 'visitantes' | 'encomendas' | 'pagamentos_fornecedores';
 
 function fileExtension(filename: string) {
   return path.extname(path.basename(filename)).toLowerCase();
@@ -164,12 +164,35 @@ export async function uploadPaymentReceipt(request: Parameters<typeof authorizeR
   }
 }
 
+export async function uploadMaintenanceEvidence(request: Parameters<typeof authorizeResource>[0], orderId: number, file: MultipartFile) {
+  const { condominiumId } = await parentCondominium(request, 'ordens_servico', orderId);
+  await authorizeResource(request, 'ordens_servico', 'update', condominiumId);
+  await authorizeResource(request, 'evidencias_manutencao', 'create', condominiumId);
+  const stored = await persistFile(file, condominiumId, 'evidencias_manutencao');
+  try {
+    return await createDwello('evidencias_manutencao', {
+      condominioId: condominiumId,
+      ordemServicoId: orderId,
+      arquivoUrl: stored.url,
+      nomeArquivo: stored.filename,
+      tipo: stored.mimetype
+    });
+  } catch (error) {
+    await rm(filePath(stored.url), { force: true });
+    throw error;
+  }
+}
+
 export async function retrieveFile(request: Parameters<typeof authorizeResource>[0], target: UploadTarget, id: number) {
   const row = await getDwello(target, id, [], true) as Record<string, unknown> | undefined;
   if (!row) throw new AppError(404, 'Arquivo não encontrado.', 'FILE_NOT_FOUND');
   const condominiumId = Number(row.condominioId);
   await authorizeResource(request, targetResource(target), 'read', condominiumId);
-  const urlKey = target === 'pagamentos_fornecedores' ? 'comprovanteUrl' : target === 'visitantes' || target === 'encomendas' ? 'fotoUrl' : 'arquivoUrl';
+  const urlKey = target === 'pagamentos_fornecedores'
+    ? 'comprovanteUrl'
+    : target === 'visitantes' || target === 'encomendas'
+      ? 'fotoUrl'
+      : 'arquivoUrl';
   const url = String(row[urlKey] ?? '');
   const absolute = filePath(url);
   try {

@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AppError } from '../errors/app-error.js';
 import { parseId } from './helpers.js';
-import { retrieveFile, uploadDocument, uploadManifestacaoAttachment, uploadSecurityEvidence, uploadVisitorPhoto, uploadPackagePhoto, uploadPaymentReceipt } from '../services/upload.service.js';
+import { retrieveFile, uploadDocument, uploadManifestacaoAttachment, uploadSecurityEvidence, uploadVisitorPhoto, uploadPackagePhoto, uploadPaymentReceipt, uploadMaintenanceEvidence } from '../services/upload.service.js';
 
 type IdParams = { id: string };
 type DocumentParams = { documentoId: string };
@@ -10,6 +10,7 @@ type OccurrenceParams = { ocorrenciaId: string };
 type VisitorParams = { visitanteId: string };
 type PackageParams = { encomendaId: string };
 type PaymentParams = { pagamentoId: string };
+type MaintenanceParams = { ordemId: string };
 
 function requiredId(value: string, reply: FastifyReply) {
   const id = parseId(value);
@@ -54,6 +55,10 @@ export const uploadController = {
     const id = requiredId(request.params.pagamentoId, reply); if (!id) return;
     return reply.send(await uploadPaymentReceipt(request, id, await requiredFile(request)));
   },
+  maintenance: async (request: FastifyRequest<{ Params: MaintenanceParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.ordemId, reply); if (!id) return;
+    return reply.status(201).send(await uploadMaintenanceEvidence(request, id, await requiredFile(request)));
+  },
   documentFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
     const id = requiredId(request.params.id, reply);
     if (!id) return;
@@ -83,5 +88,10 @@ export const uploadController = {
   paymentReceiptFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
     const id = requiredId(request.params.id, reply); if (!id) return;
     const file = await retrieveFile(request, 'pagamentos_fornecedores', id); return reply.type(file.mimetype).send(file.stream);
+  },
+  maintenanceFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.id, reply); if (!id) return;
+    const file = await retrieveFile(request, 'evidencias_manutencao', id);
+    return reply.type(file.mimetype).header('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(file.filename)}`).send(file.stream);
   }
 };
