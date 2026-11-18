@@ -381,6 +381,7 @@ CREATE TABLE `visitantes` (
   `nome` varchar(150),
   `documento` varchar(30),
   `telefone` varchar(30),
+  `foto_url` varchar(255),
   `created_at` datetime,
   `updated_at` datetime
 );
@@ -448,6 +449,7 @@ CREATE TABLE `encomendas` (
   `codigo_rastreio` varchar(100),
   `recebida_em` datetime,
   `status` varchar(30),
+  `foto_url` varchar(255),
   `created_at` datetime,
   `updated_at` datetime
 );
@@ -929,6 +931,7 @@ CREATE TABLE `pagamentos_fornecedores` (
   `valor_pago` decimal(12,2),
   `pago_em` datetime,
   `referencia` varchar(150),
+  `comprovante_url` varchar(255),
   `created_at` datetime,
   `updated_at` datetime
 );

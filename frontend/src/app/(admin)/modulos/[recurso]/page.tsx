@@ -40,24 +40,29 @@ export default function ModuloPage() {
   const [editing, setEditing] = useState<number | 'new' | null>(null);
   const [form, setForm] = useState<Record<string, string | boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [total, setTotal] = useState(0);
 
   const load = async () => {
     setLoading(true); setError('');
     try {
-      const [meta, list] = await Promise.all([api.get<{ fields: Field[] }>(`/meta/recursos/${recurso}`), api.get<Row[]>(endpoint)]);
+      const [meta, list] = await Promise.all([
+        api.get<{ fields: Field[] }>(`/meta/recursos/${recurso}`),
+        api.get<Row[]>(endpoint, { params: { q: filter || undefined, page, pageSize: PAGE_SIZE } })
+      ]);
       setFields(meta.data.fields); setRows(list.data);
+      setTotal(Number(list.headers?.['x-total-count'] ?? list.data.length));
     } catch (cause) { setError(apiMessage(cause)); }
     finally { setLoading(false); }
   };
   useEffect(() => { setPage(1); setEditing(null); setFilter(''); if (!sessionLoading && can.read) void load(); else if (!sessionLoading) setLoading(false); }, [recurso, sessionLoading, can.read]);
+  useEffect(() => { if (!sessionLoading && can.read) void load(); }, [page, filter]);
 
   const columns = useMemo(() => {
     const keys = rows.length ? Object.keys(rows[0]) : ['id', ...fields.map((field) => camel(field.key))];
     return keys.filter((key) => !HIDDEN_COLUMNS.has(key)).slice(0, 7);
   }, [rows, fields]);
-  const filtered = useMemo(() => { const q = filter.trim().toLowerCase(); return q ? rows.filter((row) => Object.values(row).some((v) => String(v ?? '').toLowerCase().includes(q))) : rows; }, [rows, filter]);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const visible = rows;
 
   const startCreate = () => { setForm(Object.fromEntries(fields.map((field) => [field.key, field.type === 'boolean' ? false : '']))); setEditing('new'); };
   const startEdit = (row: Row) => { setForm(Object.fromEntries(fields.map((field) => [field.key, toInput(field, row[camel(field.key)] ?? row[field.key])]))); setEditing(Number(row.id)); };
@@ -121,7 +126,7 @@ export default function ModuloPage() {
             </td>}
           </tr>)}</tbody>
         </table></div>}
-      {!loading && filtered.length > 0 && <div className="pagination"><span>{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}</span><div><button type="button" onClick={() => setPage((v) => Math.max(1, v - 1))} disabled={page === 1}>‹</button><strong>{page} / {totalPages}</strong><button type="button" onClick={() => setPage((v) => Math.min(totalPages, v + 1))} disabled={page === totalPages}>›</button></div></div>}
+      {!loading && total > 0 && <div className="pagination"><span>{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} de {total}</span><div><button type="button" onClick={() => setPage((v) => Math.max(1, v - 1))} disabled={page === 1}>‹</button><strong>{page} / {totalPages}</strong><button type="button" onClick={() => setPage((v) => Math.min(totalPages, v + 1))} disabled={page === totalPages}>›</button></div></div>}
     </div>
   </div>;
 }

@@ -16,7 +16,7 @@ const usuariosRoutes: FastifyPluginAsync = async (fastify) => {
   // Gestão de papéis (só SUPER_ADMIN global; checado no controller).
   fastify.get('/usuarios/papeis', listarPapeis);
   fastify.put('/usuarios/:id/papel', {
-    schema: { params: idParamsSchema, body: { type: 'object', required: ['perfil'], additionalProperties: false, properties: { perfil: { type: 'string' } } } }
+    schema: { params: idParamsSchema, body: { type: 'object', required: ['perfil'], additionalProperties: false, properties: { perfil: { type: 'string' }, condominio_id: { type: ['integer', 'null'], minimum: 1 } } } }
   }, alterarPapel);
   fastify.addHook('onRequest', requireUserPermission);
   fastify.get('/usuarios', { schema: { querystring: usuarioQuerySchema } }, listarUsuarios);

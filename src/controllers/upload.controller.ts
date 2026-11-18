@@ -1,12 +1,15 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AppError } from '../errors/app-error.js';
 import { parseId } from './helpers.js';
-import { retrieveFile, uploadDocument, uploadManifestacaoAttachment, uploadSecurityEvidence } from '../services/upload.service.js';
+import { retrieveFile, uploadDocument, uploadManifestacaoAttachment, uploadSecurityEvidence, uploadVisitorPhoto, uploadPackagePhoto, uploadPaymentReceipt } from '../services/upload.service.js';
 
 type IdParams = { id: string };
 type DocumentParams = { documentoId: string };
 type ManifestationParams = { manifestacaoId: string };
 type OccurrenceParams = { ocorrenciaId: string };
+type VisitorParams = { visitanteId: string };
+type PackageParams = { encomendaId: string };
+type PaymentParams = { pagamentoId: string };
 
 function requiredId(value: string, reply: FastifyReply) {
   const id = parseId(value);
@@ -39,6 +42,18 @@ export const uploadController = {
     if (!id) return;
     return reply.status(201).send(await uploadSecurityEvidence(request, id, await requiredFile(request)));
   },
+  visitorPhoto: async (request: FastifyRequest<{ Params: VisitorParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.visitanteId, reply); if (!id) return;
+    return reply.send(await uploadVisitorPhoto(request, id, await requiredFile(request)));
+  },
+  packagePhoto: async (request: FastifyRequest<{ Params: PackageParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.encomendaId, reply); if (!id) return;
+    return reply.send(await uploadPackagePhoto(request, id, await requiredFile(request)));
+  },
+  paymentReceipt: async (request: FastifyRequest<{ Params: PaymentParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.pagamentoId, reply); if (!id) return;
+    return reply.send(await uploadPaymentReceipt(request, id, await requiredFile(request)));
+  },
   documentFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
     const id = requiredId(request.params.id, reply);
     if (!id) return;
@@ -56,5 +71,17 @@ export const uploadController = {
     if (!id) return;
     const file = await retrieveFile(request, 'evidencias_ocorrencias', id);
     return reply.type(file.mimetype).header('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(file.filename)}`).send(file.stream);
+  },
+  visitorPhotoFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.id, reply); if (!id) return;
+    const file = await retrieveFile(request, 'visitantes', id); return reply.type(file.mimetype).send(file.stream);
+  },
+  packagePhotoFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.id, reply); if (!id) return;
+    const file = await retrieveFile(request, 'encomendas', id); return reply.type(file.mimetype).send(file.stream);
+  },
+  paymentReceiptFile: async (request: FastifyRequest<{ Params: IdParams }>, reply: FastifyReply) => {
+    const id = requiredId(request.params.id, reply); if (!id) return;
+    const file = await retrieveFile(request, 'pagamentos_fornecedores', id); return reply.type(file.mimetype).send(file.stream);
   }
 };

@@ -133,13 +133,28 @@ function whereScope(definition: Definition, id: number, condominiumIds: number[]
   return and(...conditions);
 }
 
-export async function listDwello(resource: DwelloResource, condominiumIds: number[], global = false) {
+export async function listDwello(
+  resource: DwelloResource,
+  condominiumIds: number[],
+  global = false,
+  pagination: { q?: string; page?: number; pageSize?: number } = {}
+) {
   const db = requireDb();
   const definition = dwelloDefinitions[resource];
   const table = definition.table;
-  if (!global && definition.scoped && !condominiumIds.length) return [];
+  if (!global && definition.scoped && !condominiumIds.length) {
+    return { rows: [], total: 0, page: pagination.page ?? 1, pageSize: pagination.pageSize ?? 100 };
+  }
   const condition = !global && definition.scoped ? inArray(table.condominioId, condominiumIds) : undefined;
-  return db.select().from(table).where(condition).orderBy(table.id);
+  const allRows = await db.select().from(table).where(condition).orderBy(table.id);
+  const query = pagination.q?.trim().toLowerCase();
+  const filtered = query
+    ? allRows.filter((row) => Object.values(row as Record<string, unknown>).some((value) => String(value ?? '').toLowerCase().includes(query)))
+    : allRows;
+  const page = pagination.page ?? 1;
+  const pageSize = pagination.pageSize ?? 100;
+  const start = (page - 1) * pageSize;
+  return { rows: filtered.slice(start, start + pageSize), total: filtered.length, page, pageSize };
 }
 
 export async function getDwello(resource: DwelloResource, id: number, condominiumIds: number[], global = false) {

@@ -20,7 +20,7 @@ const allowedTypes: Record<string, string[]> = {
   '.pdf': ['application/pdf']
 };
 
-type UploadTarget = 'documentos' | 'anexos_manifestacoes' | 'evidencias_ocorrencias';
+type UploadTarget = 'documentos' | 'anexos_manifestacoes' | 'evidencias_ocorrencias' | 'visitantes' | 'encomendas' | 'pagamentos_fornecedores';
 
 function fileExtension(filename: string) {
   return path.extname(path.basename(filename)).toLowerCase();
@@ -119,12 +119,58 @@ export async function uploadSecurityEvidence(request: Parameters<typeof authoriz
   }
 }
 
+export async function uploadVisitorPhoto(request: Parameters<typeof authorizeResource>[0], visitorId: number, file: MultipartFile) {
+  const { row, condominiumId } = await parentCondominium(request, 'visitantes', visitorId);
+  await authorizeResource(request, 'visitantes', 'update', condominiumId);
+  const stored = await persistFile(file, condominiumId, 'visitantes');
+  try {
+    const updated = await updateDwello('visitantes', visitorId, { fotoUrl: stored.url }, [condominiumId]);
+    const previousUrl = typeof row.fotoUrl === 'string' ? row.fotoUrl : '';
+    if (updated && previousUrl && previousUrl !== stored.url) await rm(filePath(previousUrl), { force: true }).catch(() => undefined);
+    return updated;
+  } catch (error) {
+    await rm(filePath(stored.url), { force: true });
+    throw error;
+  }
+}
+
+export async function uploadPackagePhoto(request: Parameters<typeof authorizeResource>[0], packageId: number, file: MultipartFile) {
+  const { row, condominiumId } = await parentCondominium(request, 'encomendas', packageId);
+  await authorizeResource(request, 'encomendas', 'update', condominiumId);
+  const stored = await persistFile(file, condominiumId, 'encomendas');
+  try {
+    const updated = await updateDwello('encomendas', packageId, { fotoUrl: stored.url }, [condominiumId]);
+    const previousUrl = typeof row.fotoUrl === 'string' ? row.fotoUrl : '';
+    if (updated && previousUrl && previousUrl !== stored.url) await rm(filePath(previousUrl), { force: true }).catch(() => undefined);
+    return updated;
+  } catch (error) {
+    await rm(filePath(stored.url), { force: true });
+    throw error;
+  }
+}
+
+export async function uploadPaymentReceipt(request: Parameters<typeof authorizeResource>[0], paymentId: number, file: MultipartFile) {
+  const { row, condominiumId } = await parentCondominium(request, 'pagamentos_fornecedores', paymentId);
+  await authorizeResource(request, 'pagamentos_fornecedores', 'update', condominiumId);
+  const stored = await persistFile(file, condominiumId, 'pagamentos_fornecedores');
+  try {
+    const updated = await updateDwello('pagamentos_fornecedores', paymentId, { comprovanteUrl: stored.url }, [condominiumId]);
+    const previousUrl = typeof row.comprovanteUrl === 'string' ? row.comprovanteUrl : '';
+    if (updated && previousUrl && previousUrl !== stored.url) await rm(filePath(previousUrl), { force: true }).catch(() => undefined);
+    return updated;
+  } catch (error) {
+    await rm(filePath(stored.url), { force: true });
+    throw error;
+  }
+}
+
 export async function retrieveFile(request: Parameters<typeof authorizeResource>[0], target: UploadTarget, id: number) {
   const row = await getDwello(target, id, [], true) as Record<string, unknown> | undefined;
   if (!row) throw new AppError(404, 'Arquivo não encontrado.', 'FILE_NOT_FOUND');
   const condominiumId = Number(row.condominioId);
   await authorizeResource(request, targetResource(target), 'read', condominiumId);
-  const url = String(row.arquivoUrl ?? '');
+  const urlKey = target === 'pagamentos_fornecedores' ? 'comprovanteUrl' : target === 'visitantes' || target === 'encomendas' ? 'fotoUrl' : 'arquivoUrl';
+  const url = String(row[urlKey] ?? '');
   const absolute = filePath(url);
   try {
     await stat(absolute);

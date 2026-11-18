@@ -1,6 +1,6 @@
 # Modelo de dados
 
-O arquivo editável principal é `database/dwello.sql`. Ele contém criação de tabelas, índices e relacionamentos. A configuração do Drizzle é baseada em `src/db/dwello-schema.ts`.
+O arquivo editável principal é `database/dwello.sql`. Ele contém criação de tabelas, índices e relacionamentos. A configuração do Drizzle é baseada em `src/db/dwello-schema.ts`. O diagrama editável está em `docs/modelo-dados.mmd` e sua versão imprimível em `docs/modelo-dados.pdf`.
 
 ```mermaid
 erDiagram

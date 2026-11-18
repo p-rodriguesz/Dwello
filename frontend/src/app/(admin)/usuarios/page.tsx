@@ -6,6 +6,7 @@ import { rolesOf } from '../../../lib/permissions';
 import type { Role } from '../../../lib/types';
 
 type UsuarioPapel = { id: number; nome: string | null; email: string | null; ativo: boolean; papel: Role | null };
+type Condominio = { id: number; nome: string };
 
 const ROLE_LABELS: Record<Role, string> = {
   SUPER_ADMIN: 'Super admin',
@@ -31,10 +32,20 @@ export default function UsuariosPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [filter, setFilter] = useState('');
+  const [condominios, setCondominios] = useState<Condominio[]>([]);
+  const [selectedCondominios, setSelectedCondominios] = useState<Record<number, number>>({});
 
   const load = async () => {
     setLoading(true); setError('');
-    try { setRows((await api.get<UsuarioPapel[]>('/usuarios/papeis')).data); }
+    try {
+      const [users, condominiums] = await Promise.all([
+        api.get<UsuarioPapel[]>('/usuarios/papeis'),
+        api.get<Condominio[]>('/condominios')
+      ]);
+      setRows(users.data);
+      setCondominios(condominiums.data);
+      setSelectedCondominios(Object.fromEntries(users.data.map((row) => [row.id, condominiums.data[0]?.id]).filter(([, id]) => id)));
+    }
     catch (cause) { setError(apiMessage(cause)); }
     finally { setLoading(false); }
   };
@@ -43,9 +54,12 @@ export default function UsuariosPage() {
   const change = async (row: UsuarioPapel, perfil: Role) => {
     setSavingId(row.id); setError(''); setNotice('');
     try {
-      await api.put(`/usuarios/${row.id}/papel`, { perfil });
+      const condominioId = perfil === 'SUPER_ADMIN' ? null : selectedCondominios[row.id];
+      await api.put(`/usuarios/${row.id}/papel`, { perfil, condominio_id: condominioId });
       setRows((current) => current.map((item) => item.id === row.id ? { ...item, papel: perfil } : item));
-      setNotice(`${row.nome ?? row.email} agora é ${ROLE_LABELS[perfil]}. A pessoa precisa recarregar a página para ver o novo menu.`);
+      setNotice(perfil === 'SUPER_ADMIN'
+        ? `${row.nome ?? row.email} agora é ${ROLE_LABELS[perfil]} global.`
+        : `${row.nome ?? row.email} agora é ${ROLE_LABELS[perfil]} no condomínio selecionado.`);
     } catch (cause) { setError(apiMessage(cause, 'Não foi possível alterar o papel.')); }
     finally { setSavingId(null); }
   };
@@ -71,10 +85,14 @@ export default function UsuariosPage() {
       {loading ? <div className="empty-state"><span className="spinner" /> Carregando usuários...</div>
         : visible.length === 0 ? <div className="empty-state"><span>⌁</span><strong>Nenhum usuário encontrado</strong></div>
         : <div className="table-scroll"><table>
-          <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th></tr></thead>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Condomínio</th><th>Papel</th></tr></thead>
           <tbody>{visible.map((row) => <tr key={row.id}>
             <td>{row.nome ?? '—'}</td>
             <td>{row.email ?? '—'}</td>
+            <td><select className="status-select" value={selectedCondominios[row.id] ?? ''} onChange={(e) => setSelectedCondominios((current) => ({ ...current, [row.id]: Number(e.target.value) }))} disabled={savingId === row.id}>
+              <option value="" disabled>Selecione</option>
+              {condominios.map((condominio) => <option key={condominio.id} value={condominio.id}>{condominio.nome}</option>)}
+            </select></td>
             <td>{row.id === me?.id
               ? <span className="status-pill success">{row.papel ? ROLE_LABELS[row.papel] ?? row.papel : '—'} (você)</span>
               : <select className="status-select" value={row.papel ?? ''} disabled={savingId === row.id} onChange={(e) => void change(row, e.target.value as Role)}>

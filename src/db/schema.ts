@@ -190,7 +190,7 @@ export const enderecosComplementos = mysqlTable('enderecos_complementos', {
 });
 
 export const visitantes = mysqlTable('visitantes', {
-  id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), nome: varchar('nome', { length: 150 }), documento: varchar('documento', { length: 30 }), telefone: varchar('telefone', { length: 30 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
+  id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), nome: varchar('nome', { length: 150 }), documento: varchar('documento', { length: 30 }), telefone: varchar('telefone', { length: 30 }), fotoUrl: varchar('foto_url', { length: 255 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
 });
 export const autorizacoesVisita = mysqlTable('autorizacoes_visita', {
   id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), unidadeId: int('unidade_id'), visitanteId: int('visitante_id'), autorizadoPorUsuarioId: int('autorizado_por_usuario_id'), inicioPrevisto: datetime('inicio_previsto'), fimPrevisto: datetime('fim_previsto'), status: varchar('status', { length: 30 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
@@ -208,7 +208,7 @@ export const postosPortaria = mysqlTable('postos_portaria', {
   id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), nome: varchar('nome', { length: 80 }), localizacao: varchar('localizacao', { length: 150 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
 });
 export const encomendas = mysqlTable('encomendas', {
-  id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), unidadeId: int('unidade_id'), transportadoraId: int('transportadora_id'), recebidoPorUsuarioId: int('recebido_por_usuario_id'), codigoRastreio: varchar('codigo_rastreio', { length: 100 }), recebidaEm: datetime('recebida_em'), status: varchar('status', { length: 30 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
+  id: int('id').autoincrement().primaryKey(), condominioId: int('condominio_id'), unidadeId: int('unidade_id'), transportadoraId: int('transportadora_id'), recebidoPorUsuarioId: int('recebido_por_usuario_id'), codigoRastreio: varchar('codigo_rastreio', { length: 100 }), recebidaEm: datetime('recebida_em'), status: varchar('status', { length: 30 }), fotoUrl: varchar('foto_url', { length: 255 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')
 });
 export const transportadoras = mysqlTable('transportadoras', {
   id: int('id').autoincrement().primaryKey(), nome: varchar('nome', { length: 120 }), documento: varchar('documento', { length: 30 }), createdAt: datetime('created_at'), updatedAt: datetime('updated_at')

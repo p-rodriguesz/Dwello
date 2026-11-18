@@ -314,6 +314,7 @@ export const visitantes = mysqlTable("visitantes", {
     nome: varchar('nome', { length: 150 }),
     documento: varchar('documento', { length: 30 }),
     telefone: varchar('telefone', { length: 30 }),
+    fotoUrl: varchar('foto_url', { length: 255 }),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
 });
@@ -381,6 +382,7 @@ export const encomendas = mysqlTable("encomendas", {
     codigoRastreio: varchar('codigo_rastreio', { length: 100 }),
     recebidaEm: datetime('recebida_em'),
     status: varchar('status', { length: 30 }),
+    fotoUrl: varchar('foto_url', { length: 255 }),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
 });
@@ -862,6 +864,7 @@ export const pagamentosFornecedores = mysqlTable("pagamentos_fornecedores", {
     valorPago: decimal('valor_pago', { precision: 12, scale: 2 }),
     pagoEm: datetime('pago_em'),
     referencia: varchar('referencia', { length: 150 }),
+    comprovanteUrl: varchar('comprovante_url', { length: 255 }),
     createdAt: datetime('created_at'),
     updatedAt: datetime('updated_at')
 });

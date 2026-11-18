@@ -31,12 +31,18 @@ export async function listarPapeis(request: FastifyRequest, reply: FastifyReply)
   return reply.send(rows.map((row) => ({ ...row, ativo: Boolean(row.ativo) })));
 }
 
-export async function alterarPapel(request: FastifyRequest<{ Params: { id: string }; Body: { perfil?: unknown } }>, reply: FastifyReply) {
+export async function alterarPapel(request: FastifyRequest<{ Params: { id: string }; Body: { perfil?: unknown; condominio_id?: unknown } }>, reply: FastifyReply) {
   const context = await requireGlobalSuperAdmin(request);
   const id = parseId(request.params.id);
   if (!id) return invalidId(reply);
   const perfil = request.body?.perfil;
   if (typeof perfil !== 'string' || !RBAC_ROLES.includes(perfil as RbacRole)) return invalidData(reply);
+  const condominioId = perfil === 'SUPER_ADMIN'
+    ? null
+    : Number(request.body?.condominio_id);
+  if (perfil !== 'SUPER_ADMIN' && (!Number.isSafeInteger(condominioId) || (condominioId as number) <= 0)) {
+    return reply.status(400).send({ error: 'Selecione um condomínio válido para este papel.', code: 'CONDOMINIUM_REQUIRED' });
+  }
   if (id === context.usuarioId) {
     return reply.status(400).send({ error: 'Você não pode alterar o seu próprio papel.' });
   }
@@ -46,11 +52,11 @@ export async function alterarPapel(request: FastifyRequest<{ Params: { id: strin
   if (!users.length) return reply.status(404).send({ error: 'Usuário não encontrado.' });
 
   const [result] = await pool.query<ResultSetHeader>(
-    'UPDATE usuario_perfis SET perfil = ?, ativo = 1 WHERE usuario_id = ? AND condominio_id IS NULL',
-    [perfil, id]
+    'UPDATE usuario_perfis SET perfil = ?, ativo = 1 WHERE usuario_id = ? AND condominio_id <=> ?',
+    [perfil, id, condominioId]
   );
   if (!result.affectedRows) {
-    await pool.query('INSERT INTO usuario_perfis (usuario_id, condominio_id, perfil, ativo) VALUES (?, NULL, ?, 1)', [id, perfil]);
+    await pool.query('INSERT INTO usuario_perfis (usuario_id, condominio_id, perfil, ativo) VALUES (?, ?, ?, 1)', [id, condominioId, perfil]);
   }
-  return reply.send({ id, papel: perfil });
+  return reply.send({ id, papel: perfil, condominio_id: condominioId });
 }

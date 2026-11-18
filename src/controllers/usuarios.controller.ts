@@ -13,7 +13,7 @@ type UsuarioBody = { nome?: unknown; email?: unknown; perfil?: unknown; ativo?: 
 type IdRequest = FastifyRequest<{ Params: { id: string } }>;
 type UsuarioRequest = FastifyRequest<{ Body: UsuarioBody }>;
 type UsuarioUpdateRequest = FastifyRequest<{ Params: { id: string }; Body: UsuarioBody }>;
-type BuscaRequest = FastifyRequest<{ Querystring: { q?: string } }>;
+type BuscaRequest = FastifyRequest<{ Querystring: { q?: string; page?: string; pageSize?: string } }>;
 
 const perfis = new Set([
   'SUPER_ADMIN',
@@ -54,8 +54,14 @@ function publicUsuario(usuario: typeof usuarios.$inferSelect) {
 }
 
 export async function listarUsuarios(request: BuscaRequest, reply: FastifyReply) {
+  const page = Math.max(1, Number.parseInt(request.query.page ?? '1', 10) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number.parseInt(request.query.pageSize ?? '100', 10) || 100));
   const dados = await listarUsuariosService(request.query.q);
-  return reply.send(dados.map(publicUsuario));
+  const start = (page - 1) * pageSize;
+  reply.header('X-Total-Count', String(dados.length));
+  reply.header('X-Page', String(page));
+  reply.header('X-Page-Size', String(pageSize));
+  return reply.send(dados.slice(start, start + pageSize).map(publicUsuario));
 }
 
 export async function buscarUsuarioPorId(request: IdRequest, reply: FastifyReply) {

@@ -8,6 +8,7 @@ type Body = Record<string, unknown>;
 type IdRequest = FastifyRequest<{ Params: { id: string } }>;
 type BodyRequest = FastifyRequest<{ Body: Body }>;
 type UpdateRequest = FastifyRequest<{ Params: { id: string }; Body: Body }>;
+type ListRequest = FastifyRequest<{ Querystring: { q?: string; page?: string; pageSize?: string } }>;
 
 type Field = { key: string; column: string; required?: boolean; type: 'text' | 'id' | 'number' | 'boolean' | 'date' };
 type Config = { fields: Field[]; scoped: boolean; condominiumField?: string };
@@ -138,9 +139,19 @@ function condominiumId(resource: DwelloResource, values: Record<string, unknown>
 export function dwelloController(resource: DwelloResource) {
   const config = resolveConfig(resource);
   return {
-    list: async (request: FastifyRequest, reply: FastifyReply) => {
+    list: async (request: ListRequest, reply: FastifyReply) => {
       const access = await authorizeResource(request, resource, 'read');
-      return reply.send(await listDwello(resource, access.condominioIds, access.condominioIds.length === 0));
+      const page = Math.max(1, Number.parseInt(request.query.page ?? '1', 10) || 1);
+      const pageSize = Math.min(100, Math.max(1, Number.parseInt(request.query.pageSize ?? '100', 10) || 100));
+      const result = await listDwello(resource, access.condominioIds, access.condominioIds.length === 0, {
+        q: request.query.q,
+        page,
+        pageSize
+      });
+      reply.header('X-Total-Count', String(result.total));
+      reply.header('X-Page', String(result.page));
+      reply.header('X-Page-Size', String(result.pageSize));
+      return reply.send(result.rows);
     },
     get: async (request: IdRequest, reply: FastifyReply) => {
       const recordId = parseId(request.params.id);

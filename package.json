@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@fastify/multipart": "^10.1.8",
-    "bcrypt": "^6.0.0",
     "better-auth": "^1.7.20",
     "dotenv": "^18.0.5",
     "drizzle-orm": "^0.45.3",
